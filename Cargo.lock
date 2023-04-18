@@ -5652,6 +5652,7 @@ dependencies = [
 name = "millau-runtime"
 version = "0.1.0"
 dependencies = [
+ "bp-aleph-parachain",
  "bp-messages",
  "bp-millau",
  "bp-parachains",
@@ -5659,6 +5660,7 @@ dependencies = [
  "bp-relayers",
  "bp-rialto",
  "bp-rialto-parachain",
+ "bp-rococo",
  "bp-runtime",
  "bp-westend",
  "bridge-runtime-common",
@@ -13098,6 +13100,7 @@ dependencies = [
  "polkadot-runtime-common",
  "polkadot-runtime-parachains",
  "rbtag",
+ "relay-aleph-parachain-client",
  "relay-bridge-hub-kusama-client",
  "relay-bridge-hub-polkadot-client",
  "relay-bridge-hub-rococo-client",

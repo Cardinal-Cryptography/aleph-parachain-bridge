@@ -16,6 +16,7 @@
 
 //! Chain-specific relayer configuration.
 
+mod aleph_parachain;
 mod kusama;
 mod millau;
 mod polkadot;

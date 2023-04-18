@@ -48,6 +48,8 @@ parameter_types! {
 	pub const RialtoNetwork: NetworkId = CustomNetworkId::Rialto.as_network_id();
 	/// The RialtoParachain network ID.
 	pub const RialtoParachainNetwork: NetworkId = CustomNetworkId::RialtoParachain.as_network_id();
+	/// The AlephParachain network ID.
+	pub const AlephParachainNetwork: NetworkId = CustomNetworkId::AlephParachain.as_network_id();
 
 	/// Our XCM location ancestry - i.e. our location within the Consensus Universe.
 	///

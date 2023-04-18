@@ -157,6 +157,8 @@ pub enum CustomNetworkId {
 	Rialto,
 	/// The RialtoParachain network ID, associated with Westend.
 	RialtoParachain,
+	/// The AlephParachain network ID, associated with Rococo.
+	AlephParachain,
 }
 
 impl CustomNetworkId {
@@ -165,6 +167,7 @@ impl CustomNetworkId {
 			CustomNetworkId::Millau => NetworkId::Kusama,
 			CustomNetworkId::Rialto => NetworkId::Polkadot,
 			CustomNetworkId::RialtoParachain => NetworkId::Westend,
+			CustomNetworkId::AlephParachain => NetworkId::Rococo,
 		}
 	}
 }

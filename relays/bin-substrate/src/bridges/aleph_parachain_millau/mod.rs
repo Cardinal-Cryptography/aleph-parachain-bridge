@@ -14,12 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Declaration of all bridges that the relay is able to serve.
+//! Declaration of all bridges between Aleph Parachain and Millau.
 
-pub mod aleph_parachain_millau;
-pub mod kusama_polkadot;
-pub mod rialto_millau;
-pub mod rialto_parachain_millau;
-pub mod rococo_wococo;
-pub mod rococo_millau;
-pub mod westend_millau;
+pub mod millau_headers_to_aleph_parachain;
+pub mod millau_messages_to_aleph_parachain;
+pub mod aleph_parachain_messages_to_millau;
+pub mod rococo_parachains_to_millau;

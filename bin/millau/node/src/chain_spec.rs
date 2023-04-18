@@ -15,7 +15,7 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 use millau_runtime::{
-	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeRialtoMessagesConfig,
+	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeRialtoMessagesConfig, BridgeAlephParachainMessagesConfig, BridgeRococoGrandpaConfig,
 	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig, GenesisConfig, GrandpaConfig,
 	SessionConfig, SessionKeys, Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
@@ -35,10 +35,14 @@ const ALL_AUTHORITIES_ACCOUNTS: [&str; 5] = LOCAL_AUTHORITIES_ACCOUNTS;
 const SUDO_ACCOUNT: &str = "Sudo";
 /// "Name" of the account, which owns the with-Westend GRANDPA pallet.
 const WESTEND_GRANDPA_PALLET_OWNER: &str = "Westend.GrandpaOwner";
+/// "Name" of the account, which owns the with-Rococo GRANDPA pallet.
+const ROCOCO_GRANDPA_PALLET_OWNER: &str = "Rococo.GrandpaOwner";
 /// "Name" of the account, which owns the with-Rialto messages pallet.
 const RIALTO_MESSAGES_PALLET_OWNER: &str = "Rialto.MessagesOwner";
 /// "Name" of the account, which owns the with-RialtoParachain messages pallet.
 const RIALTO_PARACHAIN_MESSAGES_PALLET_OWNER: &str = "RialtoParachain.MessagesOwner";
+/// "Name" of the account, which owns the with-AlephParachain messages pallet.
+const ALEPH_PARACHAIN_MESSAGES_PALLET_OWNER: &str = "AlephParachain.MessagesOwner";
 
 /// Specialized `ChainSpec`. This is a specialization of the general Substrate ChainSpec type.
 pub type ChainSpec = sc_service::GenericChainSpec<GenesisConfig>;
@@ -220,8 +224,18 @@ fn testnet_genesis(
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(WESTEND_GRANDPA_PALLET_OWNER)),
 			..Default::default()
 		},
+		bridge_rococo_grandpa: BridgeRococoGrandpaConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(ROCOCO_GRANDPA_PALLET_OWNER)),
+			..Default::default()
+		},
 		bridge_rialto_messages: BridgeRialtoMessagesConfig {
 			owner: Some(get_account_id_from_seed::<sr25519::Public>(RIALTO_MESSAGES_PALLET_OWNER)),
+			..Default::default()
+		},
+		bridge_aleph_parachain_messages: BridgeAlephParachainMessagesConfig {
+			owner: Some(get_account_id_from_seed::<sr25519::Public>(
+				ALEPH_PARACHAIN_MESSAGES_PALLET_OWNER,
+			)),
 			..Default::default()
 		},
 		bridge_rialto_parachain_messages: BridgeRialtoParachainMessagesConfig {

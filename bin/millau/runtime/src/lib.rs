@@ -28,6 +28,7 @@
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
 
+pub mod aleph_parachain_messages;
 pub mod rialto_messages;
 pub mod rialto_parachain_messages;
 pub mod xcm_config;
@@ -413,6 +414,15 @@ impl pallet_bridge_grandpa::Config<WestendGrandpaInstance> for Runtime {
 	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
 }
 
+pub type RococoGrandpaInstance = pallet_bridge_grandpa::Instance2;
+impl pallet_bridge_grandpa::Config<RococoGrandpaInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgedChain = bp_rococo::Rococo;
+	type MaxFreeMandatoryHeadersPerBlock = ConstU32<4>;
+	type HeadersToKeep = ConstU32<{ bp_rococo::DAYS }>;
+	type WeightInfo = pallet_bridge_grandpa::weights::BridgeWeight<Runtime>;
+}
+
 impl pallet_shift_session_manager::Config for Runtime {}
 
 parameter_types! {
@@ -424,8 +434,11 @@ parameter_types! {
 	pub const RootAccountForPayments: Option<AccountId> = None;
 	pub const RialtoChainId: bp_runtime::ChainId = bp_runtime::RIALTO_CHAIN_ID;
 	pub const RialtoParachainChainId: bp_runtime::ChainId = bp_runtime::RIALTO_PARACHAIN_CHAIN_ID;
+	pub const RococoChainId: bp_runtime::ChainId = bp_runtime::ROCOCO_CHAIN_ID;
+	pub const AlephParachainChainId: bp_runtime::ChainId = bp_runtime::ALEPH_PARACHAIN_CHAIN_ID;
 	pub RialtoActiveOutboundLanes: &'static [bp_messages::LaneId] = &[rialto_messages::XCM_LANE];
 	pub RialtoParachainActiveOutboundLanes: &'static [bp_messages::LaneId] = &[rialto_parachain_messages::XCM_LANE];
+	pub AlephParachainActiveOutboundLanes: &'static [bp_messages::LaneId] = &[aleph_parachain_messages::XCM_LANE];
 }
 
 /// Instance of the messages pallet used to relay messages to/from Rialto chain.
@@ -498,6 +511,44 @@ parameter_types! {
 	pub const MaxWestendParaHeadDataSize: u32 = bp_westend::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
 }
 
+/// Instance of the messages pallet used to relay messages to/from Aleph Parachain.
+pub type WithAlephParachainMessagesInstance = pallet_bridge_messages::Instance2;
+
+impl pallet_bridge_messages::Config<WithAlephParachainMessagesInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_bridge_messages::weights::BridgeWeight<Runtime>;
+	type ActiveOutboundLanes = AlephParachainActiveOutboundLanes;
+	type MaxUnrewardedRelayerEntriesAtInboundLane = MaxUnrewardedRelayerEntriesAtInboundLane;
+	type MaxUnconfirmedMessagesAtInboundLane = MaxUnconfirmedMessagesAtInboundLane;
+
+	type MaximalOutboundPayloadSize =
+		crate::aleph_parachain_messages::ToAlephParachainMaximalOutboundPayloadSize;
+	type OutboundPayload = crate::aleph_parachain_messages::ToAlephParachainMessagePayload;
+
+	type InboundPayload = crate::aleph_parachain_messages::FromAlephParachainMessagePayload;
+	type InboundRelayer = bp_aleph_parachain::AccountId;
+	type DeliveryPayments = ();
+
+	type TargetHeaderChain = crate::aleph_parachain_messages::AlephParachainAsTargetHeaderChain;
+	type LaneMessageVerifier = crate::aleph_parachain_messages::ToAlephParachainMessageVerifier;
+	type DeliveryConfirmationPayments = pallet_bridge_relayers::DeliveryConfirmationPaymentsAdapter<
+		Runtime,
+		WithAlephParachainMessagesInstance,
+		frame_support::traits::ConstU64<100_000>,
+	>;
+
+	type SourceHeaderChain = crate::aleph_parachain_messages::AlephParachainAsSourceHeaderChain;
+	type MessageDispatch = crate::aleph_parachain_messages::FromAlephParachainMessageDispatch;
+	type BridgedChainId = AlephParachainChainId;
+}
+
+parameter_types! {
+	pub const AlephParachainMessagesLane: bp_messages::LaneId = aleph_parachain_messages::XCM_LANE;
+	pub const AlephParachainId: u32 = bp_aleph_parachain::ALEPH_PARACHAIN_ID;
+	pub const RococoParasPalletName: &'static str = bp_rococo::PARAS_PALLET_NAME;
+	pub const MaxRococoParaHeadDataSize: u32 = bp_rococo::MAX_NESTED_PARACHAIN_HEAD_DATA_SIZE;
+}
+
 /// Instance of the with-Rialto parachains pallet.
 pub type WithRialtoParachainsInstance = ();
 
@@ -521,6 +572,19 @@ impl pallet_bridge_parachains::Config<WithWestendParachainsInstance> for Runtime
 	type BridgesGrandpaPalletInstance = WestendGrandpaInstance;
 	type ParasPalletName = WestendParasPalletName;
 	type ParaStoredHeaderDataBuilder = SingleParaStoredHeaderDataBuilder<bp_westend::Westmint>;
+	type HeadsToKeep = ConstU32<1024>;
+	type MaxParaHeadDataSize = MaxWestendParaHeadDataSize;
+}
+
+/// Instance of the with-Rococo parachains pallet.
+pub type WithRococoParachainsInstance = pallet_bridge_parachains::Instance2;
+
+impl pallet_bridge_parachains::Config<WithRococoParachainsInstance> for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
+	type BridgesGrandpaPalletInstance = RococoGrandpaInstance;
+	type ParasPalletName = RococoParasPalletName;
+	type ParaStoredHeaderDataBuilder = SingleParaStoredHeaderDataBuilder<bp_aleph_parachain::AlephParachain>;
 	type HeadsToKeep = ConstU32<1024>;
 	type MaxParaHeadDataSize = MaxWestendParaHeadDataSize;
 }
@@ -568,6 +632,13 @@ construct_runtime!(
 		BridgeWestendGrandpa: pallet_bridge_grandpa::<Instance1>::{Pallet, Call, Config<T>, Storage, Event<T>},
 		BridgeWestendParachains: pallet_bridge_parachains::<Instance1>::{Pallet, Call, Storage, Event<T>},
 
+		// Rococo bridge modules.
+		BridgeRococoGrandpa: pallet_bridge_grandpa::<Instance2>::{Pallet, Call, Config<T>, Storage, Event<T>},
+
+		// AlephParachain bridge modules.
+		BridgeRococoParachains: pallet_bridge_parachains::<Instance2>::{Pallet, Call, Storage, Event<T>},
+		BridgeAlephParachainMessages: pallet_bridge_messages::<Instance2>::{Pallet, Call, Storage, Event<T>, Config<T>},
+
 		// RialtoParachain bridge modules.
 		BridgeRialtoParachains: pallet_bridge_parachains::{Pallet, Call, Storage, Event<T>},
 		BridgeRialtoParachainMessages: pallet_bridge_messages::<Instance1>::{Pallet, Call, Storage, Event<T>, Config<T>},
@@ -580,11 +651,11 @@ construct_runtime!(
 generate_bridge_reject_obsolete_headers_and_messages! {
 	RuntimeCall, AccountId,
 	// Grandpa
-	BridgeRialtoGrandpa, BridgeWestendGrandpa,
+	BridgeRialtoGrandpa, BridgeWestendGrandpa, BridgeRococoGrandpa,
 	// Parachains
-	BridgeRialtoParachains,
-	//Messages
-	BridgeRialtoMessages, BridgeRialtoParachainMessages
+	BridgeRialtoParachains, BridgeWestendParachains, BridgeRococoParachains,
+	// Messages
+	BridgeRialtoMessages, BridgeRialtoParachainMessages, BridgeAlephParachainMessages
 }
 
 bp_runtime::generate_static_str_provider!(BridgeRefundRialtoPara2000Lane0Msgs);
@@ -859,6 +930,12 @@ impl_runtime_apis! {
 		}
 	}
 
+	impl bp_rococo::RococoFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_rococo::Hash, bp_rococo::BlockNumber>> {
+			BridgeRococoGrandpa::best_finalized()
+		}
+	}
+
 	impl bp_rialto::RialtoFinalityApi<Block> for Runtime {
 		fn best_finalized() -> Option<HeaderId<bp_rialto::Hash, bp_rialto::BlockNumber>> {
 			BridgeRialtoGrandpa::best_finalized()
@@ -877,6 +954,15 @@ impl_runtime_apis! {
 				Runtime,
 				WithWestendParachainsInstance,
 			>::best_parachain_head_id::<bp_westend::Westmint>().unwrap_or(None)
+		}
+	}
+
+	impl bp_aleph_parachain::AlephParachainFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<HeaderId<bp_aleph_parachain::Hash, bp_aleph_parachain::BlockNumber>> {
+			pallet_bridge_parachains::Pallet::<
+				Runtime,
+				WithRococoParachainsInstance,
+			>::best_parachain_head_id::<bp_aleph_parachain::AlephParachain>().unwrap_or(None)
 		}
 	}
 
@@ -935,6 +1021,31 @@ impl_runtime_apis! {
 			bridge_runtime_common::messages_api::inbound_message_details::<
 				Runtime,
 				WithRialtoParachainMessagesInstance,
+			>(lane, messages)
+		}
+	}
+
+	impl bp_aleph_parachain::ToAlephParachainOutboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			begin: bp_messages::MessageNonce,
+			end: bp_messages::MessageNonce,
+		) -> Vec<bp_messages::OutboundMessageDetails> {
+			bridge_runtime_common::messages_api::outbound_message_details::<
+				Runtime,
+				WithAlephParachainMessagesInstance,
+			>(lane, begin, end)
+		}
+	}
+
+	impl bp_aleph_parachain::FromAlephParachainInboundLaneApi<Block> for Runtime {
+		fn message_details(
+			lane: bp_messages::LaneId,
+			messages: Vec<(bp_messages::MessagePayload, bp_messages::OutboundMessageDetails)>,
+		) -> Vec<bp_messages::InboundMessageDetails> {
+			bridge_runtime_common::messages_api::inbound_message_details::<
+				Runtime,
+				WithAlephParachainMessagesInstance,
 			>(lane, messages)
 		}
 	}

@@ -58,6 +58,9 @@ pub use sp_runtime::paste;
 /// Use this when something must be shared among all instances.
 pub const NO_INSTANCE_ID: ChainId = [0, 0, 0, 0];
 
+/// AlephParachain chain id.
+pub const ALEPH_PARACHAIN_CHAIN_ID: ChainId = *b"alep";
+
 /// Rialto chain id.
 pub const RIALTO_CHAIN_ID: ChainId = *b"rlto";
 

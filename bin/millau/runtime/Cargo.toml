@@ -18,8 +18,10 @@ bp-millau = { path = "../../../primitives/chain-millau", default-features = fals
 bp-parachains = { path = "../../../primitives/parachains", default-features = false }
 bp-polkadot-core = { path = "../../../primitives/polkadot-core", default-features = false }
 bp-relayers = { path = "../../../primitives/relayers", default-features = false }
+bp-aleph-parachain = { path = "../../../primitives/chain-aleph-parachain", default-features = false }
 bp-rialto = { path = "../../../primitives/chain-rialto", default-features = false }
 bp-rialto-parachain = { path = "../../../primitives/chain-rialto-parachain", default-features = false }
+bp-rococo = { path = "../../../primitives/chain-rococo", default-features = false }
 bp-runtime = { path = "../../../primitives/runtime", default-features = false }
 bp-westend = { path = "../../../primitives/chain-westend", default-features = false }
 bridge-runtime-common = { path = "../../runtime-common", default-features = false }
@@ -86,6 +88,7 @@ std = [
 	"bp-polkadot-core/std",
 	"bp-relayers/std",
 	"bp-rialto/std",
+	"bp-aleph-parachain/std",
 	"bp-rialto-parachain/std",
 	"bp-runtime/std",
 	"bp-westend/std",
