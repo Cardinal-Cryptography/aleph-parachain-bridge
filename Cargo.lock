@@ -13080,6 +13080,7 @@ dependencies = [
  "bp-polkadot-core",
  "bp-rialto",
  "bp-rialto-parachain",
+ "bp-rococo",
  "bp-runtime",
  "bp-test-utils",
  "bridge-runtime-common",

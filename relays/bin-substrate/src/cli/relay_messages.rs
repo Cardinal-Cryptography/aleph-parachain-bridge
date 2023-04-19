@@ -28,6 +28,10 @@ use crate::bridges::{
 		millau_headers_to_rialto::MillauToRialtoCliBridge,
 		rialto_headers_to_millau::RialtoToMillauCliBridge,
 	},
+	aleph_parachain_millau::{
+		millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
+		rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
+	},
 	rialto_parachain_millau::{
 		millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,
 		rialto_parachains_to_millau::RialtoParachainToMillauCliBridge,
@@ -102,6 +106,8 @@ where
 
 impl MessagesRelayer for MillauToRialtoCliBridge {}
 impl MessagesRelayer for RialtoToMillauCliBridge {}
+impl MessagesRelayer for MillauToAlephParachainCliBridge {}
+impl MessagesRelayer for AlephParachainToMillauCliBridge {}
 impl MessagesRelayer for MillauToRialtoParachainCliBridge {}
 impl MessagesRelayer for RialtoParachainToMillauCliBridge {}
 impl MessagesRelayer for BridgeHubRococoToBridgeHubWococoMessagesCliBridge {}
@@ -127,6 +133,10 @@ impl RelayMessages {
 				BridgeHubKusamaToBridgeHubPolkadotMessagesCliBridge::relay_messages(self),
 			FullBridge::BridgeHubPolkadotToBridgeHubKusama =>
 				BridgeHubPolkadotToBridgeHubKusamaMessagesCliBridge::relay_messages(self),
+			FullBridge::MillauToAlephParachain =>
+				MillauToAlephParachainCliBridge::relay_messages(self),
+			FullBridge::AlephParachainToMillau =>
+				AlephParachainToMillauCliBridge::relay_messages(self),
 		}
 		.await
 	}

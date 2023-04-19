@@ -23,7 +23,11 @@ use crate::{
 		rialto_parachain_millau::{
 			millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,
 			rialto_parachains_to_millau::RialtoParachainToMillauCliBridge,
-		},
+		}, 
+		aleph_parachain_millau::{
+			millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
+			rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
+		}
 	},
 	cli::{
 		bridge::{FullBridge, MessagesCliBridge},
@@ -97,6 +101,8 @@ where
 impl MessageSender for MillauToRialtoCliBridge {}
 impl MessageSender for RialtoToMillauCliBridge {}
 impl MessageSender for MillauToRialtoParachainCliBridge {}
+impl MessageSender for MillauToAlephParachainCliBridge {}
+impl MessageSender for AlephParachainToMillauCliBridge {}
 impl MessageSender for RialtoParachainToMillauCliBridge {}
 
 impl SendMessage {
@@ -107,6 +113,10 @@ impl SendMessage {
 			FullBridge::RialtoToMillau => RialtoToMillauCliBridge::send_message(self),
 			FullBridge::MillauToRialtoParachain =>
 				MillauToRialtoParachainCliBridge::send_message(self),
+			FullBridge::MillauToAlephParachain =>
+				MillauToAlephParachainCliBridge::send_message(self),
+			FullBridge::AlephParachainToMillau =>
+				AlephParachainToMillauCliBridge::send_message(self),
 			FullBridge::RialtoParachainToMillau =>
 				RialtoParachainToMillauCliBridge::send_message(self),
 			FullBridge::BridgeHubRococoToBridgeHubWococo => unimplemented!(

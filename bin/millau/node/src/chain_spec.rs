@@ -182,6 +182,9 @@ fn endowed_accounts() -> Vec<AccountId> {
 		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.RialtoHeadersRelay1"),
 		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.RialtoHeadersRelay2"),
 		get_account_id_from_seed::<sr25519::Public>("RialtoParachain.MessagesSender"),
+		// Accounts, used by Millau<>AlephParachain bridge
+		get_account_id_from_seed::<sr25519::Public>(ALEPH_PARACHAIN_MESSAGES_PALLET_OWNER),
+		get_account_id_from_seed::<sr25519::Public>(ROCOCO_GRANDPA_PALLET_OWNER),
 	]
 	.into_iter()
 	.chain(all_authorities)

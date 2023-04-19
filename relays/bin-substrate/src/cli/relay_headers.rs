@@ -29,6 +29,8 @@ use crate::bridges::{
 		millau_headers_to_rialto::MillauToRialtoCliBridge,
 		rialto_headers_to_millau::RialtoToMillauCliBridge,
 	},
+	rococo_millau::rococo_headers_to_millau::RococoToMillauCliBridge,
+	aleph_parachain_millau::millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
 	rialto_parachain_millau::millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,
 	rococo_wococo::{
 		rococo_headers_to_bridge_hub_wococo::RococoToBridgeHubWococoCliBridge,
@@ -67,8 +69,10 @@ pub struct RelayHeaders {
 pub enum RelayHeadersBridge {
 	MillauToRialto,
 	RialtoToMillau,
+	RococoToMillau,
 	WestendToMillau,
 	MillauToRialtoParachain,
+	MillauToAlephParachain,
 	RococoToBridgeHubWococo,
 	WococoToBridgeHubRococo,
 	KusamaToBridgeHubPolkadot,
@@ -115,8 +119,10 @@ where
 
 impl HeadersRelayer for MillauToRialtoCliBridge {}
 impl HeadersRelayer for RialtoToMillauCliBridge {}
+impl HeadersRelayer for RococoToMillauCliBridge {}
 impl HeadersRelayer for WestendToMillauCliBridge {}
 impl HeadersRelayer for MillauToRialtoParachainCliBridge {}
+impl HeadersRelayer for MillauToAlephParachainCliBridge {}
 impl HeadersRelayer for RococoToBridgeHubWococoCliBridge {}
 impl HeadersRelayer for WococoToBridgeHubRococoCliBridge {}
 impl HeadersRelayer for KusamaToBridgeHubPolkadotCliBridge {}
@@ -133,12 +139,16 @@ impl RelayHeaders {
 				MillauToRialtoParachainCliBridge::relay_headers(self),
 			RelayHeadersBridge::RococoToBridgeHubWococo =>
 				RococoToBridgeHubWococoCliBridge::relay_headers(self),
+			RelayHeadersBridge::RococoToMillau => RococoToMillauCliBridge::relay_headers(self),
 			RelayHeadersBridge::WococoToBridgeHubRococo =>
 				WococoToBridgeHubRococoCliBridge::relay_headers(self),
 			RelayHeadersBridge::KusamaToBridgeHubPolkadot =>
 				KusamaToBridgeHubPolkadotCliBridge::relay_headers(self),
 			RelayHeadersBridge::PolkadotToBridgeHubKusama =>
 				PolkadotToBridgeHubKusamaCliBridge::relay_headers(self),
+			RelayHeadersBridge::MillauToAlephParachain => {
+				MillauToAlephParachainCliBridge::relay_headers(self)
+			},
 		}
 		.await
 	}

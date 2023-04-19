@@ -29,8 +29,10 @@ use substrate_relay_helper::{
 pub enum FullBridge {
 	MillauToRialto,
 	RialtoToMillau,
+	MillauToAlephParachain,
 	MillauToRialtoParachain,
 	RialtoParachainToMillau,
+	AlephParachainToMillau,
 	BridgeHubRococoToBridgeHubWococo,
 	BridgeHubWococoToBridgeHubRococo,
 	BridgeHubKusamaToBridgeHubPolkadot,

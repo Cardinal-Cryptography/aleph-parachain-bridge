@@ -19,6 +19,7 @@ use codec::Encode;
 
 use crate::{
 	bridges::{
+		aleph_parachain_millau::millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
 		rialto_millau::{
 			millau_headers_to_rialto::MillauToRialtoCliBridge,
 			rialto_headers_to_millau::RialtoToMillauCliBridge,
@@ -28,7 +29,7 @@ use crate::{
 			rococo_headers_to_bridge_hub_wococo::RococoToBridgeHubWococoCliBridge,
 			wococo_headers_to_bridge_hub_rococo::WococoToBridgeHubRococoCliBridge,
 		},
-		westend_millau::westend_headers_to_millau::WestendToMillauCliBridge,
+		westend_millau::westend_headers_to_millau::WestendToMillauCliBridge, rococo_millau::rococo_headers_to_millau::RococoToMillauCliBridge,
 	},
 	cli::{bridge::CliBridgeBase, chain_schema::*},
 };
@@ -62,8 +63,10 @@ pub struct InitBridge {
 pub enum InitBridgeName {
 	MillauToRialto,
 	RialtoToMillau,
+	RococoToMillau,
 	WestendToMillau,
 	MillauToRialtoParachain,
+	MillauToAlephParachain,
 	RococoToBridgeHubWococo,
 	WococoToBridgeHubRococo,
 }
@@ -118,6 +121,39 @@ impl BridgeInitializer for MillauToRialtoCliBridge {
 			call: Box::new(rialto_runtime::BridgeGrandpaCall::initialize { init_data }.into()),
 		}
 		.into()
+	}
+}
+
+impl BridgeInitializer for RococoToMillauCliBridge {
+	type Engine = GrandpaFinalityEngine<Self::Source>;
+
+	fn encode_init_bridge(
+		init_data: <Self::Engine as Engine<Self::Source>>::InitializationData,
+	) -> <Self::Target as Chain>::Call {
+		millau_runtime::SudoCall::sudo {
+			call: Box::new(millau_runtime::BridgeGrandpaCall::<
+				millau_runtime::Runtime,
+				millau_runtime::RococoGrandpaInstance,
+			>::initialize { init_data }.into()),
+		}
+		.into()
+	}
+}
+
+impl BridgeInitializer for MillauToAlephParachainCliBridge {
+	type Engine = GrandpaFinalityEngine<Self::Source>;
+
+	fn encode_init_bridge(
+		init_data: <Self::Engine as Engine<Self::Source>>::InitializationData,
+	) -> <Self::Target as Chain>::Call {
+		type RuntimeCall = relay_aleph_parachain_client::RuntimeCall;
+		type BridgeGrandpaCall = relay_aleph_parachain_client::BridgeGrandpaCall;
+		type SudoCall = relay_aleph_parachain_client::SudoCall;
+		
+		let initialize_call =
+			RuntimeCall::BridgeMillauGrandpa(BridgeGrandpaCall::initialize { init_data });
+
+		RuntimeCall::Sudo(SudoCall::sudo { call: Box::new(initialize_call) })
 	}
 }
 
@@ -215,6 +251,9 @@ impl InitBridge {
 				RococoToBridgeHubWococoCliBridge::init_bridge(self),
 			InitBridgeName::WococoToBridgeHubRococo =>
 				WococoToBridgeHubRococoCliBridge::init_bridge(self),
+			InitBridgeName::MillauToAlephParachain =>
+				MillauToAlephParachainCliBridge::init_bridge(self),
+			InitBridgeName::RococoToMillau => RococoToMillauCliBridge::init_bridge(self),
 		}
 		.await
 	}
