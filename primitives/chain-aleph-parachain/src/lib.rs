@@ -15,7 +15,7 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Primitives for AlephParachain chain.
-//! 
+//!
 //! This is mostly a copy of the RialtoParachain chain primitives
 
 #![cfg_attr(not(feature = "std"), no_std)]

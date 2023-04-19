@@ -20,6 +20,10 @@ use structopt::StructOpt;
 use strum::VariantNames;
 
 use crate::bridges::{
+	aleph_parachain_millau::{
+		millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
+		rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
+	},
 	kusama_polkadot::{
 		bridge_hub_kusama_messages_to_bridge_hub_polkadot::BridgeHubKusamaToBridgeHubPolkadotMessagesCliBridge,
 		bridge_hub_polkadot_messages_to_bridge_hub_kusama::BridgeHubPolkadotToBridgeHubKusamaMessagesCliBridge,
@@ -27,10 +31,6 @@ use crate::bridges::{
 	rialto_millau::{
 		millau_headers_to_rialto::MillauToRialtoCliBridge,
 		rialto_headers_to_millau::RialtoToMillauCliBridge,
-	},
-	aleph_parachain_millau::{
-		millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
-		rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
 	},
 	rialto_parachain_millau::{
 		millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,

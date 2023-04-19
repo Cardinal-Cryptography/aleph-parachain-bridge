@@ -21,6 +21,7 @@ use structopt::StructOpt;
 use strum::{EnumString, EnumVariantNames, VariantNames};
 
 use crate::bridges::{
+	aleph_parachain_millau::millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
 	kusama_polkadot::{
 		kusama_headers_to_bridge_hub_polkadot::KusamaToBridgeHubPolkadotCliBridge,
 		polkadot_headers_to_bridge_hub_kusama::PolkadotToBridgeHubKusamaCliBridge,
@@ -29,9 +30,8 @@ use crate::bridges::{
 		millau_headers_to_rialto::MillauToRialtoCliBridge,
 		rialto_headers_to_millau::RialtoToMillauCliBridge,
 	},
-	rococo_millau::rococo_headers_to_millau::RococoToMillauCliBridge,
-	aleph_parachain_millau::millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
 	rialto_parachain_millau::millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,
+	rococo_millau::rococo_headers_to_millau::RococoToMillauCliBridge,
 	rococo_wococo::{
 		rococo_headers_to_bridge_hub_wococo::RococoToBridgeHubWococoCliBridge,
 		wococo_headers_to_bridge_hub_rococo::WococoToBridgeHubRococoCliBridge,
@@ -146,9 +146,8 @@ impl RelayHeaders {
 				KusamaToBridgeHubPolkadotCliBridge::relay_headers(self),
 			RelayHeadersBridge::PolkadotToBridgeHubKusama =>
 				PolkadotToBridgeHubKusamaCliBridge::relay_headers(self),
-			RelayHeadersBridge::MillauToAlephParachain => {
-				MillauToAlephParachainCliBridge::relay_headers(self)
-			},
+			RelayHeadersBridge::MillauToAlephParachain =>
+				MillauToAlephParachainCliBridge::relay_headers(self),
 		}
 		.await
 	}

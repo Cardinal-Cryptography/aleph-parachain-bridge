@@ -15,9 +15,10 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 use millau_runtime::{
-	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeRialtoMessagesConfig, BridgeAlephParachainMessagesConfig, BridgeRococoGrandpaConfig,
-	BridgeRialtoParachainMessagesConfig, BridgeWestendGrandpaConfig, GenesisConfig, GrandpaConfig,
-	SessionConfig, SessionKeys, Signature, SudoConfig, SystemConfig, WASM_BINARY,
+	AccountId, AuraConfig, BalancesConfig, BeefyConfig, BridgeAlephParachainMessagesConfig,
+	BridgeRialtoMessagesConfig, BridgeRialtoParachainMessagesConfig, BridgeRococoGrandpaConfig,
+	BridgeWestendGrandpaConfig, GenesisConfig, GrandpaConfig, SessionConfig, SessionKeys,
+	Signature, SudoConfig, SystemConfig, WASM_BINARY,
 };
 use sp_consensus_aura::sr25519::AuthorityId as AuraId;
 use sp_consensus_beefy::crypto::AuthorityId as BeefyId;

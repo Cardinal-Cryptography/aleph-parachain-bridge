@@ -584,7 +584,8 @@ impl pallet_bridge_parachains::Config<WithRococoParachainsInstance> for Runtime 
 	type WeightInfo = pallet_bridge_parachains::weights::BridgeWeight<Runtime>;
 	type BridgesGrandpaPalletInstance = RococoGrandpaInstance;
 	type ParasPalletName = RococoParasPalletName;
-	type ParaStoredHeaderDataBuilder = SingleParaStoredHeaderDataBuilder<bp_aleph_parachain::AlephParachain>;
+	type ParaStoredHeaderDataBuilder =
+		SingleParaStoredHeaderDataBuilder<bp_aleph_parachain::AlephParachain>;
 	type HeadsToKeep = ConstU32<1024>;
 	type MaxParaHeadDataSize = MaxWestendParaHeadDataSize;
 }

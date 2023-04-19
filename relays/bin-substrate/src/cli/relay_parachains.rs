@@ -15,11 +15,11 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::bridges::{
+	aleph_parachain_millau::rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
 	kusama_polkadot::{
 		kusama_parachains_to_bridge_hub_polkadot::BridgeHubKusamaToBridgeHubPolkadotCliBridge,
 		polkadot_parachains_to_bridge_hub_kusama::BridgeHubPolkadotToBridgeHubKusamaCliBridge,
 	},
-	aleph_parachain_millau::rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
 	rialto_parachain_millau::rialto_parachains_to_millau::RialtoParachainToMillauCliBridge,
 	rococo_wococo::{
 		rococo_parachains_to_bridge_hub_wococo::BridgeHubRococoToBridgeHubWococoCliBridge,

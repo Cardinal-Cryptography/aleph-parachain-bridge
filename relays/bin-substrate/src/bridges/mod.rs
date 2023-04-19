@@ -20,6 +20,6 @@ pub mod aleph_parachain_millau;
 pub mod kusama_polkadot;
 pub mod rialto_millau;
 pub mod rialto_parachain_millau;
-pub mod rococo_wococo;
 pub mod rococo_millau;
+pub mod rococo_wococo;
 pub mod westend_millau;

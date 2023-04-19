@@ -142,8 +142,7 @@ impl XcmBlobHauler for ToAlephParachainXcmBlobHauler {
 mod tests {
 	use super::*;
 	use crate::{
-		PriorityBoostPerMessage, RococoGrandpaInstance, Runtime,
-		WithAlephParachainMessagesInstance,
+		PriorityBoostPerMessage, RococoGrandpaInstance, Runtime, WithAlephParachainMessagesInstance,
 	};
 
 	use bridge_runtime_common::{

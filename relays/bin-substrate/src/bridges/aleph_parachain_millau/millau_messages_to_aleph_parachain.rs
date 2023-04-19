@@ -16,8 +16,8 @@
 
 //! Millau-to-AlephParachain messages sync entrypoint.
 
-use relay_millau_client::Millau;
 use relay_aleph_parachain_client::AlephParachain;
+use relay_millau_client::Millau;
 use substrate_relay_helper::{
 	messages_lane::{DirectReceiveMessagesDeliveryProofCallBuilder, SubstrateMessageLane},
 	UtilityPalletBatchCallBuilder,

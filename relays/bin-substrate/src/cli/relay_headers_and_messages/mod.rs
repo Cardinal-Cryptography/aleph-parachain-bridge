@@ -526,7 +526,9 @@ impl RelayHeadersAndMessages {
 					.run()
 					.await,
 			RelayHeadersAndMessages::AlephParachainMillau(params) =>
-				MillauAlephParachainFull2WayBridge::new(params.into_bridge().await?)?.run().await,
+				MillauAlephParachainFull2WayBridge::new(params.into_bridge().await?)?
+					.run()
+					.await,
 		}
 	}
 }

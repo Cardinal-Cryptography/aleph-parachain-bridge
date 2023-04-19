@@ -17,9 +17,9 @@
 //! Rococo-to-Millau parachains sync entrypoint.
 
 use crate::cli::bridge::{CliBridgeBase, MessagesCliBridge, ParachainToRelayHeadersCliBridge};
+use relay_aleph_parachain_client::AlephParachain;
 use relay_millau_client::Millau;
 use relay_rococo_client::Rococo;
-use relay_aleph_parachain_client::AlephParachain;
 use substrate_relay_helper::parachains::{
 	DirectSubmitParachainHeadsCallBuilder, SubstrateParachainsPipeline,
 };

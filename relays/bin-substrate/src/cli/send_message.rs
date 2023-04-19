@@ -16,6 +16,10 @@
 
 use crate::{
 	bridges::{
+		aleph_parachain_millau::{
+			millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
+			rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
+		},
 		rialto_millau::{
 			millau_headers_to_rialto::MillauToRialtoCliBridge,
 			rialto_headers_to_millau::RialtoToMillauCliBridge,
@@ -23,11 +27,7 @@ use crate::{
 		rialto_parachain_millau::{
 			millau_headers_to_rialto_parachain::MillauToRialtoParachainCliBridge,
 			rialto_parachains_to_millau::RialtoParachainToMillauCliBridge,
-		}, 
-		aleph_parachain_millau::{
-			millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
-			rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
-		}
+		},
 	},
 	cli::{
 		bridge::{FullBridge, MessagesCliBridge},

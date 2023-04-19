@@ -16,7 +16,7 @@
 
 //! Declaration of all bridges between Aleph Parachain and Millau.
 
+pub mod aleph_parachain_messages_to_millau;
 pub mod millau_headers_to_aleph_parachain;
 pub mod millau_messages_to_aleph_parachain;
-pub mod aleph_parachain_messages_to_millau;
 pub mod rococo_parachains_to_millau;
