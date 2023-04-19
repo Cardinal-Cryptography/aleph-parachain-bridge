@@ -16,5 +16,4 @@
 
 //! Declaration of all bridges between Rococo and Millau.
 
-pub mod rococo_parachains_to_millau;
 pub mod rococo_headers_to_millau;

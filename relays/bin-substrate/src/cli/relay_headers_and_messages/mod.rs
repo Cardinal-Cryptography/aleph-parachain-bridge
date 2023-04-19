@@ -40,6 +40,10 @@ use relay_to_relay::*;
 
 use crate::{
 	bridges::{
+		aleph_parachain_millau::{
+			millau_headers_to_aleph_parachain::MillauToAlephParachainCliBridge,
+			rococo_parachains_to_millau::AlephParachainToMillauCliBridge,
+		},
 		rialto_millau::{
 			millau_headers_to_rialto::MillauToRialtoCliBridge,
 			rialto_headers_to_millau::RialtoToMillauCliBridge,
@@ -195,6 +199,7 @@ where
 }
 
 // All supported chains.
+declare_chain_cli_schema!(AlephParachain, aleph_parachain);
 declare_chain_cli_schema!(Millau, millau);
 declare_chain_cli_schema!(Rialto, rialto);
 declare_chain_cli_schema!(RialtoParachain, rialto_parachain);
@@ -205,8 +210,11 @@ declare_chain_cli_schema!(BridgeHubWococo, bridge_hub_wococo);
 // Means to override signers of different layer transactions.
 declare_chain_cli_schema!(MillauHeadersToRialto, millau_headers_to_rialto);
 declare_chain_cli_schema!(MillauHeadersToRialtoParachain, millau_headers_to_rialto_parachain);
+declare_chain_cli_schema!(MillauHeadersToAlephParachain, millau_headers_to_aleph_parachain);
 declare_chain_cli_schema!(RialtoHeadersToMillau, rialto_headers_to_millau);
 declare_chain_cli_schema!(RialtoParachainsToMillau, rialto_parachains_to_millau);
+declare_chain_cli_schema!(RococoParachainsToMillau, rococo_parachains_to_bridge_hub_wococo);
+declare_chain_cli_schema!(RococoHeadersToMillau, rococo_headers_to_millau);
 declare_chain_cli_schema!(RococoHeadersToBridgeHubWococo, rococo_headers_to_bridge_hub_wococo);
 declare_chain_cli_schema!(
 	RococoParachainsToBridgeHubWococo,
@@ -220,6 +228,7 @@ declare_chain_cli_schema!(
 // All supported bridges.
 declare_relay_to_relay_bridge_schema!(Millau, Rialto);
 declare_relay_to_parachain_bridge_schema!(Millau, RialtoParachain, Rialto);
+declare_relay_to_parachain_bridge_schema!(Millau, AlephParachain, Rococo);
 declare_parachain_to_parachain_bridge_schema!(BridgeHubRococo, Rococo, BridgeHubWococo, Wococo);
 
 /// Base portion of the bidirectional complex relay.
@@ -437,6 +446,32 @@ impl Full2WayBridge for MillauRialtoParachainFull2WayBridge {
 	}
 }
 
+/// Millau <> AlephParachain complex relay.
+pub struct MillauAlephParachainFull2WayBridge {
+	base: <Self as Full2WayBridge>::Base,
+}
+
+#[async_trait]
+impl Full2WayBridge for MillauAlephParachainFull2WayBridge {
+	type Base = RelayToParachainBridge<Self::L2R, Self::R2L>;
+	type Left = relay_millau_client::Millau;
+	type Right = relay_aleph_parachain_client::AlephParachain;
+	type L2R = MillauToAlephParachainCliBridge;
+	type R2L = AlephParachainToMillauCliBridge;
+
+	fn new(base: Self::Base) -> anyhow::Result<Self> {
+		Ok(Self { base })
+	}
+
+	fn base(&self) -> &Self::Base {
+		&self.base
+	}
+
+	fn mut_base(&mut self) -> &mut Self::Base {
+		&mut self.base
+	}
+}
+
 /// BridgeHubRococo <> BridgeHubWococo complex relay.
 pub struct BridgeHubRococoBridgeHubWococoFull2WayBridge {
 	base: <Self as Full2WayBridge>::Base,
@@ -470,6 +505,8 @@ pub enum RelayHeadersAndMessages {
 	MillauRialto(MillauRialtoHeadersAndMessages),
 	/// Millau <> RialtoParachain relay.
 	MillauRialtoParachain(MillauRialtoParachainHeadersAndMessages),
+	/// AlephParachain <> Millau relay.
+	AlephParachainMillau(MillauAlephParachainHeadersAndMessages),
 	/// BridgeHubRococo <> BridgeHubWococo relay.
 	BridgeHubRococoBridgeHubWococo(BridgeHubRococoBridgeHubWococoHeadersAndMessages),
 }
@@ -488,6 +525,8 @@ impl RelayHeadersAndMessages {
 				BridgeHubRococoBridgeHubWococoFull2WayBridge::new(params.into_bridge().await?)?
 					.run()
 					.await,
+			RelayHeadersAndMessages::AlephParachainMillau(params) =>
+				MillauAlephParachainFull2WayBridge::new(params.into_bridge().await?)?.run().await,
 		}
 	}
 }
