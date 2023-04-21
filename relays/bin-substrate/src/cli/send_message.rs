@@ -116,9 +116,9 @@ impl SendMessage {
 			FullBridge::MillauToAlephParachain =>
 				MillauToAlephParachainCliBridge::send_message(self),
 			FullBridge::AlephParachainToMillau =>
-				AlephParachainToMillauCliBridge::send_message(self),
+				unimplemented!("Sending message from AlephParachain to Millau is not supported"),
 			FullBridge::RialtoParachainToMillau =>
-				RialtoParachainToMillauCliBridge::send_message(self),
+				unimplemented!("Sending message from RialtoParachain to Millau is not supported"),
 			FullBridge::BridgeHubRococoToBridgeHubWococo => unimplemented!(
 				"Sending message from BridgeHubRococo to BridgeHubWococo is not supported"
 			),

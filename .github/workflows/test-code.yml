@@ -1,0 +1,33 @@
+name: Test Code
+
+on:
+  pull_request:
+    branches:
+    - master
+  push:
+    branches:
+    - master
+
+jobs:
+  test-code:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v2
+
+    - name: Install toolchain
+      uses: actions-rs/toolchain@v1
+      with:
+        profile: minimal
+        toolchain: nightly
+        components: rustfmt, clippy
+        target: wasm32-unknown-unknown
+        override: true
+        default: true
+
+    - name: Check and Lint Code
+      run: cargo +nightly clippy -- -D warnings
+
+    - name: Test Code
+      run: cargo test
