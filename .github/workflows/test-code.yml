@@ -10,13 +10,18 @@ on:
 
 jobs:
   test-code:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
+    env:
+      RUST_BACKTRACE: full
+      RUSTC_WRAPPER: sccache
 
     steps:
     - name: Checkout Code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Install Protoc
       uses: arduino/setup-protoc@v1
+      with:
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
 
     - name: Install toolchain
       uses: actions-rs/toolchain@v1
@@ -25,7 +30,7 @@ jobs:
         toolchain: nightly
         components: rustfmt, clippy
         target: wasm32-unknown-unknown
-        override: true
+        override: false
         default: true
 
     - name: Check and Lint Code
