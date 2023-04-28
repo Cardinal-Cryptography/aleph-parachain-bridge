@@ -72,16 +72,16 @@ pub const MAX_UNREWARDED_RELAYERS_IN_CONFIRMATION_TX: MessageNonce = 1024;
 /// Maximal number of unconfirmed messages in Aleph confirmation transaction.
 pub const MAX_UNCONFIRMED_MESSAGES_IN_CONFIRMATION_TX: MessageNonce = 1024;
 
-/// Block number type used in Aleph.
+/// Block number type used in AlephParachain.
 pub type BlockNumber = u32;
 
-/// Hash type used in Aleph.
+/// Hash type used in AlephParachain.
 pub type Hash = <BlakeTwo256 as HasherT>::Out;
 
-/// The type of object that can produce hashes on Aleph.
+/// The type of object that can produce hashes on AlephParachain.
 pub type Hasher = BlakeTwo256;
 
-/// The header type used by Aleph.
+/// The header type used by AlephParachain.
 pub type Header = sp_runtime::generic::Header<BlockNumber, Hasher>;
 
 /// Alias to 512-bit hash when used in the context of a transaction signature on the chain.

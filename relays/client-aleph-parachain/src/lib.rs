@@ -51,7 +51,7 @@ impl Chain for AlephParachain {
 	const NAME: &'static str = "AlephParachain";
 	const BEST_FINALIZED_HEADER_ID_METHOD: &'static str =
 		bp_aleph_parachain::BEST_FINALIZED_ALEPH_PARACHAIN_HEADER_METHOD;
-	const AVERAGE_BLOCK_INTERVAL: Duration = Duration::from_secs(5);
+	const AVERAGE_BLOCK_INTERVAL: Duration = Duration::from_secs(12);
 
 	type SignedBlock = bp_polkadot_core::SignedBlock;
 	type Call = runtime_types::aleph_parachain_runtime::RuntimeCall;
