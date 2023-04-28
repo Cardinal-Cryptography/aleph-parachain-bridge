@@ -1472,9 +1472,9 @@ dependencies = [
 
 [[package]]
 name = "clap"
-version = "4.2.2"
+version = "4.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9b802d85aaf3a1cdb02b224ba472ebdea62014fccfcb269b95a4d76443b5ee5a"
+checksum = "956ac1f6381d8d82ab4684768f89c0ea3afe66925ceadb4eeb3fc452ffc55d62"
 dependencies = [
  "clap_builder",
  "clap_derive",
@@ -1483,9 +1483,9 @@ dependencies = [
 
 [[package]]
 name = "clap_builder"
-version = "4.2.2"
+version = "4.2.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "14a1a858f532119338887a4b8e1af9c60de8249cd7bafd68036a489e261e37b6"
+checksum = "84080e799e54cff944f4b4a4b0e71630b0e0443b25b985175c7dddc1a859b749"
 dependencies = [
  "anstream",
  "anstyle",
@@ -1633,18 +1633,18 @@ dependencies = [
 
 [[package]]
 name = "cranelift-bforest"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a7379abaacee0f14abf3204a7606118f0465785252169d186337bcb75030815a"
+checksum = "2bc42ba2e232e5b20ff7dc299a812d53337dadce9a7e39a238e6a5cb82d2e57b"
 dependencies = [
  "cranelift-entity",
 ]
 
 [[package]]
 name = "cranelift-codegen"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9489fa336927df749631f1008007ced2871068544f40a202ce6d93fbf2366a7b"
+checksum = "253531aca9b6f56103c9420369db3263e784df39aa1c90685a1f69cfbba0623e"
 dependencies = [
  "arrayvec 0.7.2",
  "bumpalo",
@@ -1663,33 +1663,33 @@ dependencies = [
 
 [[package]]
 name = "cranelift-codegen-meta"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05bbb67da91ec721ed57cef2f7c5ef7728e1cd9bde9ffd3ef8601022e73e3239"
+checksum = "72f2154365e2bff1b1b8537a7181591fdff50d8e27fa6e40d5c69c3bad0ca7c8"
 dependencies = [
  "cranelift-codegen-shared",
 ]
 
 [[package]]
 name = "cranelift-codegen-shared"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "418ecb2f36032f6665dc1a5e2060a143dbab41d83b784882e97710e890a7a16d"
+checksum = "687e14e3f5775248930e0d5a84195abef8b829958e9794bf8d525104993612b4"
 
 [[package]]
 name = "cranelift-entity"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7cf583f7b093f291005f9fb1323e2c37f6ee4c7909e39ce016b2e8360d461705"
+checksum = "f42ea692c7b450ad18b8c9889661505d51c09ec4380cf1c2d278dbb2da22cae1"
 dependencies = [
  "serde",
 ]
 
 [[package]]
 name = "cranelift-frontend"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0b66bf9e916f57fbbd0f7703ec6286f4624866bf45000111627c70d272c8dda1"
+checksum = "8483c2db6f45fe9ace984e5adc5d058102227e4c62e5aa2054e16b0275fd3a6e"
 dependencies = [
  "cranelift-codegen",
  "log",
@@ -1699,15 +1699,15 @@ dependencies = [
 
 [[package]]
 name = "cranelift-isle"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "649782a39ce99798dd6b4029e2bb318a2fbeaade1b4fa25330763c10c65bc358"
+checksum = "e9793158837678902446c411741d87b43f57dadfb944f2440db4287cda8cbd59"
 
 [[package]]
 name = "cranelift-native"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "937e021e089c51f9749d09e7ad1c4f255c2f8686cb8c3df63a34b3ec9921bc41"
+checksum = "72668c7755f2b880665cb422c8ad2d56db58a88b9bebfef0b73edc2277c13c49"
 dependencies = [
  "cranelift-codegen",
  "libc",
@@ -1716,9 +1716,9 @@ dependencies = [
 
 [[package]]
 name = "cranelift-wasm"
-version = "0.93.1"
+version = "0.93.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d850cf6775477747c9dfda9ae23355dd70512ffebc70cf82b85a5b111ae668b5"
+checksum = "3852ce4b088b44ac4e29459573943009a70d1b192c8d77ef949b4e814f656fc1"
 dependencies = [
  "cranelift-codegen",
  "cranelift-entity",
@@ -1901,7 +1901,7 @@ name = "cumulus-client-cli"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/cumulus?branch=master#863e94d8627bfd30c61cf2aeac3b8706f768bb8f"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-cli",
@@ -2264,7 +2264,7 @@ dependencies = [
  "async-trait",
  "cumulus-primitives-core",
  "futures",
- "jsonrpsee-core",
+ "jsonrpsee-core 0.16.2",
  "parity-scale-codec",
  "polkadot-overseer",
  "sc-client-api",
@@ -2322,7 +2322,7 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "futures",
  "futures-timer",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "lru 0.9.0",
  "parity-scale-codec",
  "polkadot-overseer",
@@ -3317,7 +3317,7 @@ dependencies = [
  "Inflector",
  "array-bytes 4.2.0",
  "chrono",
- "clap 4.2.2",
+ "clap 4.2.4",
  "comfy-table",
  "frame-benchmarking",
  "frame-support",
@@ -4138,7 +4138,7 @@ dependencies = [
  "rustls 0.20.8",
  "rustls-native-certs",
  "tokio",
- "tokio-rustls",
+ "tokio-rustls 0.23.4",
  "webpki-roots",
 ]
 
@@ -4453,13 +4453,26 @@ version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7d291e3a5818a2384645fd9756362e6d89cf0541b0b916fa7702ea4a9833608e"
 dependencies = [
- "jsonrpsee-client-transport",
- "jsonrpsee-core",
+ "jsonrpsee-client-transport 0.16.2",
+ "jsonrpsee-core 0.16.2",
  "jsonrpsee-http-client",
- "jsonrpsee-proc-macros",
+ "jsonrpsee-proc-macros 0.16.2",
  "jsonrpsee-server",
- "jsonrpsee-types",
- "jsonrpsee-ws-client",
+ "jsonrpsee-types 0.16.2",
+ "jsonrpsee-ws-client 0.16.2",
+ "tracing",
+]
+
+[[package]]
+name = "jsonrpsee"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8b971ce0f6cd1521ede485afc564b95b2c8e7079b9da41d4273bd9b55140a55d"
+dependencies = [
+ "jsonrpsee-core 0.17.1",
+ "jsonrpsee-proc-macros 0.17.1",
+ "jsonrpsee-types 0.17.1",
+ "jsonrpsee-ws-client 0.17.1",
  "tracing",
 ]
 
@@ -4471,17 +4484,36 @@ checksum = "965de52763f2004bc91ac5bcec504192440f0b568a5d621c59d9dbd6f886c3fb"
 dependencies = [
  "futures-util",
  "http",
- "jsonrpsee-core",
- "jsonrpsee-types",
+ "jsonrpsee-core 0.16.2",
+ "jsonrpsee-types 0.16.2",
  "pin-project",
  "rustls-native-certs",
  "soketto",
  "thiserror",
  "tokio",
- "tokio-rustls",
+ "tokio-rustls 0.23.4",
  "tokio-util",
  "tracing",
  "webpki-roots",
+]
+
+[[package]]
+name = "jsonrpsee-client-transport"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7ca00d975eda834826b04ad57d4e690c67439bb51b02eb0f8b7e4c30fcef8ab9"
+dependencies = [
+ "futures-util",
+ "http",
+ "jsonrpsee-core 0.17.1",
+ "pin-project",
+ "rustls-native-certs",
+ "soketto",
+ "thiserror",
+ "tokio",
+ "tokio-rustls 0.24.0",
+ "tokio-util",
+ "tracing",
 ]
 
 [[package]]
@@ -4500,7 +4532,7 @@ dependencies = [
  "futures-util",
  "globset",
  "hyper",
- "jsonrpsee-types",
+ "jsonrpsee-types 0.16.2",
  "parking_lot 0.12.1",
  "rand 0.8.5",
  "rustc-hash",
@@ -4513,6 +4545,28 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonrpsee-core"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b83cca7a5a7899eed8b2935d5f755c8c4052ad66ab5b328bd34ac2b3ffd3515f"
+dependencies = [
+ "anyhow",
+ "async-lock",
+ "async-trait",
+ "beef",
+ "futures-timer",
+ "futures-util",
+ "jsonrpsee-types 0.17.1",
+ "rustc-hash",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tokio-stream",
+ "tracing",
+]
+
+[[package]]
 name = "jsonrpsee-http-client"
 version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4521,8 +4575,8 @@ dependencies = [
  "async-trait",
  "hyper",
  "hyper-rustls",
- "jsonrpsee-core",
- "jsonrpsee-types",
+ "jsonrpsee-core 0.16.2",
+ "jsonrpsee-types 0.16.2",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -4545,6 +4599,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonrpsee-proc-macros"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d814a21d9a819f8de1a41b819a263ffd68e4bb5f043d936db1c49b54684bde0a"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro-crate",
+ "proc-macro2 1.0.56",
+ "quote 1.0.26",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "jsonrpsee-server"
 version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4554,8 +4621,8 @@ dependencies = [
  "futures-util",
  "http",
  "hyper",
- "jsonrpsee-core",
- "jsonrpsee-types",
+ "jsonrpsee-core 0.16.2",
+ "jsonrpsee-types 0.16.2",
  "serde",
  "serde_json",
  "soketto",
@@ -4581,15 +4648,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "jsonrpsee-types"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd301ccc3e08718393432d1961539d78c4580dcca86014dfe6769c308b2c08b2"
+dependencies = [
+ "anyhow",
+ "beef",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "jsonrpsee-ws-client"
 version = "0.16.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0b83daeecfc6517cfe210df24e570fb06213533dfb990318fae781f4c7119dd9"
 dependencies = [
  "http",
- "jsonrpsee-client-transport",
- "jsonrpsee-core",
- "jsonrpsee-types",
+ "jsonrpsee-client-transport 0.16.2",
+ "jsonrpsee-core 0.16.2",
+ "jsonrpsee-types 0.16.2",
+]
+
+[[package]]
+name = "jsonrpsee-ws-client"
+version = "0.17.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89a69852133d549b07cb37ff2d0ec540eae0d20abb75ae923f5d39bc7536d987"
+dependencies = [
+ "http",
+ "jsonrpsee-client-transport 0.17.1",
+ "jsonrpsee-core 0.17.1",
+ "jsonrpsee-types 0.17.1",
 ]
 
 [[package]]
@@ -5588,6 +5681,7 @@ dependencies = [
  "async-std",
  "async-trait",
  "bp-messages",
+ "env_logger",
  "finality-relay",
  "futures",
  "hex",
@@ -5613,10 +5707,10 @@ dependencies = [
 name = "millau-bridge-node"
 version = "0.1.0"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "frame-benchmarking",
  "frame-benchmarking-cli",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "millau-runtime",
  "mmr-rpc",
  "node-inspect",
@@ -5769,7 +5863,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "anyhow",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "parity-scale-codec",
  "serde",
  "sp-api",
@@ -6043,7 +6137,7 @@ name = "node-inspect"
 version = "0.9.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "parity-scale-codec",
  "sc-cli",
  "sc-client-api",
@@ -7274,7 +7368,7 @@ name = "pallet-transaction-payment-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "pallet-transaction-payment-rpc-runtime-api",
  "parity-scale-codec",
  "sp-api",
@@ -7832,7 +7926,7 @@ name = "polkadot-cli"
 version = "0.9.41"
 source = "git+https://github.com/paritytech/polkadot?branch=master#476d3ddddf7a8f7361edac92228d0200abac0895"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "frame-benchmarking-cli",
  "futures",
  "log",
@@ -8507,7 +8601,7 @@ name = "polkadot-rpc"
 version = "0.9.41"
 source = "git+https://github.com/paritytech/polkadot?branch=master#476d3ddddf7a8f7361edac92228d0200abac0895"
 dependencies = [
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "mmr-rpc",
  "pallet-transaction-payment-rpc",
  "polkadot-primitives",
@@ -9725,7 +9819,7 @@ dependencies = [
  "frame-support",
  "frame-system",
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.17.1",
  "log",
  "num-traits",
  "pallet-balances",
@@ -9833,7 +9927,7 @@ dependencies = [
 name = "rialto-bridge-node"
 version = "0.1.0"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "frame-benchmarking",
  "frame-benchmarking-cli",
  "frame-support",
@@ -9860,7 +9954,7 @@ dependencies = [
 name = "rialto-parachain-collator"
 version = "0.1.0"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "cumulus-client-cli",
  "cumulus-client-consensus-aura",
  "cumulus-client-consensus-common",
@@ -9871,7 +9965,7 @@ dependencies = [
  "cumulus-relay-chain-interface",
  "frame-benchmarking",
  "frame-benchmarking-cli",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "pallet-transaction-payment-rpc",
  "parity-scale-codec",
@@ -10325,6 +10419,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustls"
+version = "0.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "07180898a28ed6a7f7ba2311594308f595e3dd2e3c3812fa0a80a47b45f17e5d"
+dependencies = [
+ "log",
+ "ring",
+ "rustls-webpki",
+ "sct 0.7.0",
+]
+
+[[package]]
 name = "rustls-native-certs"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10343,6 +10449,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d194b56d58803a43635bdc398cd17e383d6f71f9182b9a192c127ca42494a59b"
 dependencies = [
  "base64 0.21.0",
+]
+
+[[package]]
+name = "rustls-webpki"
+version = "0.100.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d6207cd5ed3d8dca7816f8f3725513a34609c0c765bf652b8c3cb4cfd87db46b"
+dependencies = [
+ "ring",
+ "untrusted",
 ]
 
 [[package]]
@@ -10500,7 +10616,7 @@ source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45
 dependencies = [
  "array-bytes 4.2.0",
  "chrono",
- "clap 4.2.2",
+ "clap 4.2.4",
  "fdlimit",
  "futures",
  "libp2p",
@@ -10684,7 +10800,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "sc-consensus-babe",
  "sc-consensus-epochs",
  "sc-rpc-api",
@@ -10741,7 +10857,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -10814,7 +10930,7 @@ source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45
 dependencies = [
  "finality-grandpa",
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -11196,7 +11312,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -11225,7 +11341,7 @@ name = "sc-rpc-api"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-transaction-pool-api",
@@ -11245,7 +11361,7 @@ version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "http",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "serde_json",
  "substrate-prometheus-endpoint",
@@ -11263,7 +11379,7 @@ dependencies = [
  "futures",
  "futures-util",
  "hex",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -11290,7 +11406,7 @@ dependencies = [
  "exit-future",
  "futures",
  "futures-timer",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "parking_lot 0.12.1",
@@ -11362,7 +11478,7 @@ name = "sc-storage-monitor"
 version = "0.1.0"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "clap 4.2.2",
+ "clap 4.2.4",
  "fs4",
  "futures",
  "log",
@@ -11378,7 +11494,7 @@ name = "sc-sync-state-rpc"
 version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "parity-scale-codec",
  "sc-chain-spec",
  "sc-client-api",
@@ -11541,14 +11657,56 @@ dependencies = [
 
 [[package]]
 name = "scale-decode"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d823d4be477fc33321f93d08fb6c2698273d044f01362dc27573a750deb7c233"
+checksum = "c7e5527e4b3bf079d4c0b2f253418598c380722ba37ef20fac9088081407f2b6"
 dependencies = [
  "parity-scale-codec",
+ "primitive-types",
  "scale-bits",
+ "scale-decode-derive",
  "scale-info",
  "thiserror",
+]
+
+[[package]]
+name = "scale-decode-derive"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b38741b2f78e4391b94eac6b102af0f6ea2b0f7fe65adb55d7f4004f507854db"
+dependencies = [
+ "darling",
+ "proc-macro-crate",
+ "proc-macro2 1.0.56",
+ "quote 1.0.26",
+ "syn 1.0.109",
+]
+
+[[package]]
+name = "scale-encode"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "15546e5efbb45f0fc2291f7e202dee8623274c5d8bbfdf9c6886cc8b44a7ced3"
+dependencies = [
+ "parity-scale-codec",
+ "primitive-types",
+ "scale-bits",
+ "scale-encode-derive",
+ "scale-info",
+ "thiserror",
+]
+
+[[package]]
+name = "scale-encode-derive"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dd983cf0a9effd76138554ead18a6de542d1af175ac12fd5e91836c5c0268082"
+dependencies = [
+ "darling",
+ "proc-macro-crate",
+ "proc-macro2 1.0.56",
+ "quote 1.0.26",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -11579,15 +11737,16 @@ dependencies = [
 
 [[package]]
 name = "scale-value"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "16a5e7810815bd295da73e4216d1dfbced3c7c7c7054d70fa5f6e4c58123fff4"
+checksum = "11f549769261561e6764218f847e500588f9a79a289de49ce92f9e26642a3574"
 dependencies = [
  "either",
  "frame-metadata",
  "parity-scale-codec",
  "scale-bits",
  "scale-decode",
+ "scale-encode",
  "scale-info",
  "serde",
  "thiserror",
@@ -12358,16 +12517,16 @@ dependencies = [
 
 [[package]]
 name = "sp-core-hashing"
-version = "6.0.0"
+version = "8.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cbc2d1947252b7a4e403b0a260f596920443742791765ec111daa2bbf98eff25"
+checksum = "27449abdfbe41b473e625bce8113745e81d65777dd1d5a8462cf24137930dad8"
 dependencies = [
- "blake2",
+ "blake2b_simd",
  "byteorder",
  "digest 0.10.6",
  "sha2 0.10.6",
  "sha3",
- "sp-std 6.0.0",
+ "sp-std 7.0.0",
  "twox-hash",
 ]
 
@@ -12667,9 +12826,9 @@ source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45
 
 [[package]]
 name = "sp-std"
-version = "6.0.0"
+version = "7.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af0ee286f98455272f64ac5bb1384ff21ac029fbb669afbaf48477faff12760e"
+checksum = "1de8eef39962b5b97478719c493bed2926cf70cb621005bbf68ebe58252ff986"
 
 [[package]]
 name = "sp-storage"
@@ -13042,7 +13201,7 @@ source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45
 dependencies = [
  "frame-system-rpc-runtime-api",
  "futures",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "sc-rpc-api",
@@ -13181,7 +13340,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "async-trait",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "sc-rpc-api",
  "serde",
@@ -13193,7 +13352,7 @@ name = "substrate-state-trie-migration-rpc"
 version = "4.0.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "log",
  "parity-scale-codec",
  "sc-client-api",
@@ -13241,13 +13400,14 @@ checksum = "6bdef32e8150c2a081110b42772ffe7d7c9032b606bc226c8260fd97e0976601"
 
 [[package]]
 name = "subxt"
-version = "0.27.1"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "54639dba6a113584083968b6a8f457dedae612abe1bd214762101ca29f12e332"
+checksum = "53b9c4ddefcb2d87eb18a6336f65635c29208f766d0deefaa2a1a19f7426a993"
 dependencies = [
  "base58",
  "blake2",
  "derivative",
+ "either",
  "frame-metadata",
  "futures",
  "getrandom 0.2.9",
@@ -13258,11 +13418,12 @@ dependencies = [
  "primitive-types",
  "scale-bits",
  "scale-decode",
+ "scale-encode",
  "scale-info",
  "scale-value",
  "serde",
  "serde_json",
- "sp-core-hashing 6.0.0",
+ "sp-core-hashing 8.0.0",
  "subxt-macro",
  "subxt-metadata",
  "thiserror",
@@ -13271,30 +13432,30 @@ dependencies = [
 
 [[package]]
 name = "subxt-codegen"
-version = "0.27.1"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8e86cb719003f1cedf2710a6e55ca4c37aba4c989bbd3b81dd1c52af9e4827e"
+checksum = "e924f41069e9273236398ff89662d6d336468a5d94faac812129d44547db0e7f"
 dependencies = [
  "darling",
  "frame-metadata",
  "heck 0.4.1",
  "hex",
- "jsonrpsee",
+ "jsonrpsee 0.16.2",
  "parity-scale-codec",
- "proc-macro-error",
  "proc-macro2 1.0.56",
  "quote 1.0.26",
  "scale-info",
  "subxt-metadata",
  "syn 1.0.109",
+ "thiserror",
  "tokio",
 ]
 
 [[package]]
 name = "subxt-macro"
-version = "0.27.1"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74c08de402a78c4c06c3ee3702c80e519efdcb65911348e018b6998d04404916"
+checksum = "ced0b043a069ee039f8700d3dfda01be156e4229c82277c305bc8e79a7dd855d"
 dependencies = [
  "darling",
  "proc-macro-error",
@@ -13304,14 +13465,14 @@ dependencies = [
 
 [[package]]
 name = "subxt-metadata"
-version = "0.27.1"
+version = "0.28.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2593ab5f53435e6352675af4f9851342607f37785d84c7a3fb3139550d3c35f0"
+checksum = "18be3b8f4308fe7369ee1df66ae59c2eca79de20eab57b0f41c75736e843300f"
 dependencies = [
  "frame-metadata",
  "parity-scale-codec",
  "scale-info",
- "sp-core-hashing 6.0.0",
+ "sp-core-hashing 8.0.0",
 ]
 
 [[package]]
@@ -13658,6 +13819,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-rustls"
+version = "0.24.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e0d409377ff5b1e3ca6437aa86c1eb7d40c134bfec254e44c830defa92669db5"
+dependencies = [
+ "rustls 0.21.0",
+ "tokio",
+]
+
+[[package]]
 name = "tokio-stream"
 version = "0.1.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -13959,7 +14130,7 @@ version = "0.10.0-dev"
 source = "git+https://github.com/paritytech/substrate?branch=master#915d22ccaa45b2b93b1eb4194b4349c1db7930d8"
 dependencies = [
  "async-trait",
- "clap 4.2.2",
+ "clap 4.2.4",
  "frame-remote-externalities",
  "hex",
  "log",
@@ -14020,9 +14191,9 @@ version = "1.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "97fee6b57c6a41524a810daee9286c02d7752c4253064d0b05472833a438f675"
 dependencies = [
- "cfg-if 1.0.0",
+ "cfg-if 0.1.10",
  "digest 0.10.6",
- "rand 0.8.5",
+ "rand 0.7.3",
  "static_assertions",
 ]
 
@@ -14429,9 +14600,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f6e89f9819523447330ffd70367ef4a18d8c832e24e8150fe054d1d912841632"
+checksum = "76a222f5fa1e14b2cefc286f1b68494d7a965f4bf57ec04c59bb62673d639af6"
 dependencies = [
  "anyhow",
  "bincode",
@@ -14457,18 +14628,18 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-asm-macros"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9bd3a5e46c198032da934469f3a6e48649d1f9142438e4fd4617b68a35644b8a"
+checksum = "4407a7246e7d2f3d8fb1cf0c72fda8dbafdb6dd34d555ae8bea0e5ae031089cc"
 dependencies = [
  "cfg-if 1.0.0",
 ]
 
 [[package]]
 name = "wasmtime-cache"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b389ae9b678b9c3851091a4804f4182d688d27aff7abc9aa37fa7be37d8ecffa"
+checksum = "5ceb3adf61d654be0be67fffdce42447b0880481348785be5fe40b5dd7663a4c"
 dependencies = [
  "anyhow",
  "base64 0.13.1",
@@ -14486,9 +14657,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-cranelift"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "59b2c92a08c0db6efffd88fdc97d7aa9c7c63b03edb0971dbca745469f820e8c"
+checksum = "3c366bb8647e01fd08cb5589976284b00abfded5529b33d7e7f3f086c68304a4"
 dependencies = [
  "anyhow",
  "cranelift-codegen",
@@ -14507,9 +14678,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-environ"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9a6db9fc52985ba06ca601f2ff0ff1f526c5d724c7ac267b47326304b0c97883"
+checksum = "47b8b50962eae38ee319f7b24900b7cf371f03eebdc17400c1dc8575fc10c9a7"
 dependencies = [
  "anyhow",
  "cranelift-entity",
@@ -14526,9 +14697,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-jit"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b77e3a52cd84d0f7f18554afa8060cfe564ccac61e3b0802d3fd4084772fa5f6"
+checksum = "ffaed4f9a234ba5225d8e64eac7b4a5d13b994aeb37353cde2cbeb3febda9eaa"
 dependencies = [
  "addr2line 0.17.0",
  "anyhow",
@@ -14550,9 +14721,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-jit-debug"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0245e8a9347017c7185a72e215218a802ff561545c242953c11ba00fccc930f"
+checksum = "eed41cbcbf74ce3ff6f1d07d1b707888166dc408d1a880f651268f4f7c9194b2"
 dependencies = [
  "object 0.29.0",
  "once_cell",
@@ -14561,9 +14732,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-jit-icache-coherence"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67d412e9340ab1c83867051d8d1d7c90aa8c9afc91da086088068e2734e25064"
+checksum = "43a28ae1e648461bfdbb79db3efdaee1bca5b940872e4175390f465593a2e54c"
 dependencies = [
  "cfg-if 1.0.0",
  "libc",
@@ -14572,9 +14743,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-runtime"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d594e791b5fdd4dbaf8cf7ae62f2e4ff85018ce90f483ca6f42947688e48827d"
+checksum = "e704b126e4252788ccfc3526d4d4511d4b23c521bf123e447ac726c14545217b"
 dependencies = [
  "anyhow",
  "cc",
@@ -14596,9 +14767,9 @@ dependencies = [
 
 [[package]]
 name = "wasmtime-types"
-version = "6.0.1"
+version = "6.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a6688d6f96d4dbc1f89fab626c56c1778936d122b5f4ae7a57c2eb42b8d982e2"
+checksum = "83e5572c5727c1ee7e8f28717aaa8400e4d22dcbd714ea5457d85b5005206568"
 dependencies = [
  "cranelift-entity",
  "serde",
@@ -15390,9 +15561,9 @@ dependencies = [
 
 [[package]]
 name = "yap"
-version = "0.7.2"
+version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5fc77f52dc9e9b10d55d3f4462c3b7fc393c4f17975d641542833ab2d3bc26ef"
+checksum = "e2a7eb6d82a11e4d0b8e6bda8347169aff4ccd8235d039bba7c47482d977dcf7"
 
 [[package]]
 name = "yasna"

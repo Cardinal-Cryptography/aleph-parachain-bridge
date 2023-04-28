@@ -373,6 +373,7 @@ parameter_types! {
 	/// Authorities are changing every 5 minutes.
 	pub const Period: BlockNumber = bp_millau::SESSION_LENGTH;
 	pub const Offset: BlockNumber = 0;
+	pub const RelayerStakeReserveId: [u8; 8] = *b"brdgrlrs";
 }
 
 impl pallet_session::Config for Runtime {
@@ -393,6 +394,14 @@ impl pallet_bridge_relayers::Config for Runtime {
 	type Reward = Balance;
 	type PaymentProcedure =
 		bp_relayers::PayRewardFromAccount<pallet_balances::Pallet<Runtime>, AccountId>;
+	type StakeAndSlash = pallet_bridge_relayers::StakeAndSlashNamed<
+		AccountId,
+		BlockNumber,
+		Balances,
+		RelayerStakeReserveId,
+		ConstU64<1_000>,
+		ConstU64<8>,
+	>;
 	type WeightInfo = ();
 }
 
@@ -1211,16 +1220,20 @@ impl_runtime_apis! {
 			}
 
 			impl RelayersConfig for Runtime {
-				fn prepare_environment(
+				fn prepare_rewards_account(
 					account_params: RewardsAccountParams,
 					reward: Balance,
 				) {
-					use frame_support::traits::fungible::Mutate;
 					let rewards_account = bp_relayers::PayRewardFromAccount::<
 						Balances,
 						AccountId
 					>::rewards_account(account_params);
-					Balances::mint_into(&rewards_account, reward).unwrap();
+					Self::deposit_account(rewards_account, reward);
+				}
+
+				fn deposit_account(account: AccountId, balance: Balance) {
+					use frame_support::traits::fungible::Mutate;
+					Balances::mint_into(&account, balance.saturating_add(ExistentialDeposit::get())).unwrap();
 				}
 			}
 
