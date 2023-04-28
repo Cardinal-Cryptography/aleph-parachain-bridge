@@ -59,8 +59,6 @@ pub type FromAlephParachainMessagePayload = messages::target::FromBridgedChainMe
 /// Call-dispatch based message dispatch for AlephParachain -> Millau messages.
 pub type FromAlephParachainMessageDispatch =
 	bridge_runtime_common::messages_xcm_extension::XcmBlobMessageDispatch<
-		bp_millau::Millau,
-		bp_rococo::Rococo,
 		crate::xcm_config::OnMillauBlobDispatcher,
 		(),
 	>;
