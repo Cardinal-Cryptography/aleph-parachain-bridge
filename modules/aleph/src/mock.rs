@@ -40,6 +40,7 @@ type Block = frame_system::mocking::MockBlock<TestRuntime>;
 type UncheckedExtrinsic = frame_system::mocking::MockUncheckedExtrinsic<TestRuntime>;
 
 pub const MAX_BRIDGED_AUTHORITIES: u32 = 5;
+pub const MAX_HEADERS_KEPT: u32 = 5;
 
 use crate as aleph;
 
@@ -88,7 +89,7 @@ impl frame_system::Config for TestRuntime {
 }
 
 parameter_types! {
-	pub const HeadersToKeep: u32 = 5;
+	pub const HeadersToKeep: u32 = MAX_HEADERS_KEPT;
 	pub const SessionLength: u64 = 5;
 	pub const NumValidators: u32 = 5;
 }

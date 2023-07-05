@@ -974,7 +974,6 @@ dependencies = [
  "aleph-bft-crypto",
  "bp-header-chain",
  "bp-runtime",
- "bp-test-utils",
  "frame-support",
  "hex",
  "parity-scale-codec",

@@ -167,7 +167,7 @@ pub mod pallet {
 
 			let init_allowed = !<BestFinalized<T>>::exists();
 			ensure!(init_allowed, <Error<T>>::AlreadyInitialized);
-			initialize_bridge::<T>(init_data.clone())?;
+			Self::initialize_bridge(init_data.clone())?;
 
 			log::info!(
 				target: LOG_TARGET,
@@ -259,7 +259,7 @@ pub mod pallet {
 			}
 
 			if let Some(init_data) = self.init_data.clone() {
-				initialize_bridge::<T>(init_data).expect("genesis config is correct; qed");
+				Pallet::<T>::initialize_bridge(init_data).expect("genesis config is correct; qed");
 			} else {
 				// Since the bridge hasn't been initialized we shouldn't allow anyone to perform
 				// transactions.
@@ -288,33 +288,46 @@ pub mod pallet {
 		BridgeModule(bp_runtime::OwnedBridgeModuleError),
 	}
 
-	/// Import a previously verified header to the storage.
-	///
-	/// Note this function solely takes care of updating the storage and pruning old entries,
-	/// but does not verify the validity of such import.
-	fn insert_header<T: Config>(header: BridgedHeader<T>, hash: BridgedBlockHash<T>) {
-		let index = <ImportedHashesPointer<T>>::get();
-		let pruning = <ImportedHashes<T>>::try_get(index);
-		<BestFinalized<T>>::put(HeaderId(*header.number(), hash));
-		<ImportedHeaders<T>>::insert(hash, header.build());
-		<ImportedHashes<T>>::insert(index, hash);
+	impl<T: Config> Pallet<T> {
+		/// Import a previously verified header to the storage.
+		///
+		/// Note this function solely takes care of updating the storage and pruning old entries,
+		/// but does not verify the validity of such import.
+		pub(crate) fn insert_header(header: BridgedHeader<T>) {
+			if let Some(best_finalized_block) = Self::best_finalized() {
+				if header.number() <= &best_finalized_block.number() {
+					log::debug!(
+						target: LOG_TARGET,
+						"Skipping import of old header: {:?}.",
+						header.hash()
+					);
+					return
+				}
+			}
 
-		// Update ring buffer pointer and remove old header.
-		<ImportedHashesPointer<T>>::put((index + 1) % T::HeadersToKeep::get());
-		if let Ok(hash) = pruning {
-			log::debug!(target: LOG_TARGET, "Pruning old header: {:?}.", hash);
-			<ImportedHeaders<T>>::remove(hash);
+			let hash = header.hash();
+			let index = <ImportedHashesPointer<T>>::get();
+			let pruning = <ImportedHashes<T>>::try_get(index);
+			<BestFinalized<T>>::put(HeaderId(*header.number(), hash));
+			<ImportedHeaders<T>>::insert(hash, header.build());
+			<ImportedHashes<T>>::insert(index, hash);
+
+			// Update ring buffer pointer and remove old header.
+			<ImportedHashesPointer<T>>::put((index + 1) % T::HeadersToKeep::get());
+			if let Ok(hash) = pruning {
+				log::debug!(target: LOG_TARGET, "Pruning old header: {:?}.", hash);
+				<ImportedHeaders<T>>::remove(hash);
+			}
 		}
-	}
 
-	/// Since this writes to storage with no real checks this should only be used in functions that
-	/// were called by a trusted origin.
-	fn initialize_bridge<T: Config>(
-		init_params: super::InitializationData<BridgedHeader<T>>,
-	) -> Result<(), Error<T>> {
-		let super::InitializationData { header, authority_list, operating_mode } = init_params;
-		let authority_set_length = authority_list.len();
-		let authority_set = StoredAuthoritySet::<T>::try_new(authority_list)
+		/// Since this writes to storage with no real checks this should only be used in functions
+		/// that were called by a trusted origin.
+		fn initialize_bridge(
+			init_params: super::InitializationData<BridgedHeader<T>>,
+		) -> Result<(), Error<T>> {
+			let super::InitializationData { header, authority_list, operating_mode } = init_params;
+			let authority_set_length = authority_list.len();
+			let authority_set = StoredAuthoritySet::<T>::try_new(authority_list)
 			.map_err(|e| {
 				log::error!(
 					target: LOG_TARGET,
@@ -324,15 +337,15 @@ pub mod pallet {
 				);
 				e
 			})?;
-		let initial_hash = header.hash();
 
-		<ImportedHashesPointer<T>>::put(0);
-		insert_header::<T>(*header, initial_hash);
+			<ImportedHashesPointer<T>>::put(0);
+			Self::insert_header(*header);
 
-		<CurrentAuthoritySet<T>>::put(authority_set);
-		<PalletOperatingMode<T>>::put(operating_mode);
+			<CurrentAuthoritySet<T>>::put(authority_set);
+			<PalletOperatingMode<T>>::put(operating_mode);
 
-		Ok(())
+			Ok(())
+		}
 	}
 
 	/// Adapter for using `Config::HeadersToKeep` as `MaxValues` bound in our storage maps.
@@ -368,8 +381,8 @@ impl<T: Config> HeaderChain<BridgedChain<T>> for AlephChainHeaders<T> {
 mod tests {
 	use super::*;
 	use crate::mock::{
-		run_test, test_header, RuntimeOrigin, System, TestHeader, TestRuntime,
-		MAX_BRIDGED_AUTHORITIES,
+		run_test, test_header, Aleph, RuntimeOrigin, System, TestHeader, TestRuntime,
+		MAX_BRIDGED_AUTHORITIES, MAX_HEADERS_KEPT,
 	};
 	use bp_aleph_header_chain::AuthorityId;
 	use bp_runtime::{BasicOperatingMode, UnverifiedStorageProof};
@@ -404,7 +417,7 @@ mod tests {
 			operating_mode: BasicOperatingMode::Normal,
 		};
 
-		Pallet::<TestRuntime>::initialize(origin, init_data.clone()).map(|_| init_data)
+		Aleph::initialize(origin, init_data.clone()).map(|_| init_data)
 	}
 
 	generate_owned_bridge_module_tests!(BasicOperatingMode::Normal, BasicOperatingMode::Halted);
@@ -435,7 +448,7 @@ mod tests {
 	fn init_storage_entries_are_correctly_initialized() {
 		run_test(|| {
 			assert_eq!(BestFinalized::<TestRuntime>::get(), None,);
-			assert_eq!(Pallet::<TestRuntime>::best_finalized(), None);
+			assert_eq!(Aleph::best_finalized(), None);
 			assert_eq!(PalletOperatingMode::<TestRuntime>::try_get(), Err(()));
 
 			let init_data = init_with_origin(RuntimeOrigin::root()).unwrap();
@@ -477,7 +490,7 @@ mod tests {
 			};
 
 			assert_noop!(
-				Pallet::<TestRuntime>::initialize(RuntimeOrigin::root(), init_data),
+				Aleph::initialize(RuntimeOrigin::root(), init_data),
 				Error::<TestRuntime>::TooManyAuthoritiesInSet,
 			);
 		});
@@ -498,7 +511,7 @@ mod tests {
 			<BestFinalized<TestRuntime>>::put(HeaderId(2, hash));
 			<ImportedHeaders<TestRuntime>>::insert(hash, header.build());
 
-			assert_ok!(Pallet::<TestRuntime>::verify_storage_proof(hash, storage_proof).map(|_| ()));
+			assert_ok!(Aleph::verify_storage_proof(hash, storage_proof).map(|_| ()));
 		});
 	}
 
@@ -518,5 +531,62 @@ mod tests {
 			BestFinalized::<TestRuntime>::storage_value_final_key().to_vec(),
 			bp_header_chain::storage_keys::best_finalized_key("Aleph").0,
 		);
+	}
+
+	#[test]
+	fn insert_header_simple() {
+		run_test(|| {
+			initialize_substrate_bridge();
+
+			let header = test_header(1);
+			let hash = header.hash();
+
+			Aleph::insert_header(header.clone());
+			assert_eq!(<ImportedHeaders<TestRuntime>>::get(hash), Some(header.build()));
+		})
+	}
+
+	#[test]
+	fn insert_header_pruning() {
+		run_test(|| {
+			initialize_substrate_bridge();
+
+			for i in 0..2 * MAX_HEADERS_KEPT {
+				let header = test_header(i as u64);
+				Aleph::insert_header(header.clone());
+			}
+
+			assert_eq!(ImportedHeaders::<TestRuntime>::iter().count(), MAX_HEADERS_KEPT as usize);
+
+			for i in 0..MAX_HEADERS_KEPT {
+				let header = test_header(i as u64);
+				assert!(!<ImportedHeaders<TestRuntime>>::contains_key(header.hash()));
+			}
+
+			for i in MAX_HEADERS_KEPT..2 * MAX_HEADERS_KEPT {
+				let header = test_header(i as u64);
+				let hash = header.hash();
+				assert!(<ImportedHeaders<TestRuntime>>::contains_key(header.hash()));
+				assert_eq!(<ImportedHeaders<TestRuntime>>::get(hash), Some(header.build()));
+			}
+		})
+	}
+
+	#[test]
+	fn insert_header_best_finalized() {
+		run_test(|| {
+			initialize_substrate_bridge();
+
+			let header_1 = test_header(1);
+			Aleph::insert_header(header_1.clone());
+
+			let header_3 = test_header(3);
+			Aleph::insert_header(header_3.clone());
+
+			let header_2 = test_header(2);
+			Aleph::insert_header(header_2.clone());
+
+			assert_eq!(Aleph::best_finalized_number(), Some(3));
+		})
 	}
 }
