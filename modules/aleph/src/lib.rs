@@ -85,6 +85,64 @@ pub mod pallet {
 
 	#[pallet::call]
 	impl<T: Config> Pallet<T> {
+		/// Verify a target header is finalized according to the given finality proof.
+		///
+		/// It will use the underlying storage pallet to fetch information about the current
+		/// authorities and best finalized header in order to verify that the header is finalized.
+		///
+		/// If successful in verification, it will write the target header to the underlying storage
+		/// pallet.
+		///
+		/// The call fails if:
+		///
+		/// - the pallet is halted;
+		///
+		/// - the pallet knows better header than the `finality_target`;
+		///
+		/// - justification is invalid;
+		#[pallet::call_index(0)]
+		#[pallet::weight((T::DbWeight::get().reads_writes(0, 0), DispatchClass::Operational))]
+		pub fn submit_finality_proof(
+			origin: OriginFor<T>,
+			justification: AlephFullJustification<BridgedHeader<T>>,
+		) -> DispatchResultWithPostInfo {
+			Self::ensure_not_halted().map_err(Error::<T>::BridgeModule)?;
+			ensure_signed(origin)?;
+
+			let authority_set = <CurrentAuthoritySet<T>>::get();
+			let unused_proof_size = authority_set.unused_proof_size();
+			verify_justification::<T>(&justification)?;
+
+			let is_authorities_change_enacted =
+				try_enact_authority_change::<T>(&finality_target)?;
+			if may_refund_call_fee {
+				FreeMandatoryHeadersRemaining::<T, I>::mutate(|count| {
+					*count = count.saturating_sub(1)
+				});
+			}
+			insert_header::<T>(justification.header());
+			log::info!(
+				target: LOG_TARGET,
+				"Successfully imported finalized header with hash {:?}!",
+				hash
+			);
+
+			// the proof size component of the call weight assumes that there are
+			// `MaxBridgedAuthorities` in the `CurrentAuthoritySet` (we use `MaxEncodedLen`
+			// estimation). But if their number is lower, then we may "refund" some `proof_size`,
+			// making proof smaller and leaving block space to other useful transactions
+			let pre_dispatch_weight = T::WeightInfo::submit_finality_proof(
+				justification.commit.precommits.len().saturated_into(),
+				justification.votes_ancestries.len().saturated_into(),
+			);
+			let actual_weight = pre_dispatch_weight
+				.set_proof_size(pre_dispatch_weight.proof_size().saturating_sub(unused_proof_size));
+
+			Self::deposit_event(Event::UpdatedBestFinalizedHeader { number, hash });
+
+			Ok(().into())
+		}
+
 		/// Bootstrap the bridge pallet with an initial header and authority set from which to sync.
 		///
 		/// The initial configuration provided does not need to be the genesis header of the bridged
