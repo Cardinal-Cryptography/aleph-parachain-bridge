@@ -27,9 +27,10 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::large_enum_variant)]
 
-use bp_aleph_header_chain::{ChainWithAleph, InitializationData};
+use bp_aleph_header_chain::{ChainWithAleph, InitializationData, aleph_justification::{AlephFullJustification, verify_justification, decode_versioned_aleph_justification}, AuthoritySet, ALEPH_ENGINE_ID, ConsensusLog};
 use bp_header_chain::{HeaderChain, StoredHeaderData, StoredHeaderDataBuilder};
 use bp_runtime::{BlockNumberOf, HashOf, HasherOf, HeaderId, HeaderOf, OwnedBridgeModule};
+use sp_runtime::EncodedJustification;
 use frame_support::sp_runtime::traits::Header;
 
 #[cfg(test)]
@@ -57,6 +58,7 @@ pub mod pallet {
 	use bp_runtime::BasicOperatingMode;
 	use frame_support::pallet_prelude::*;
 	use frame_system::pallet_prelude::*;
+use sp_runtime::DispatchError;
 
 	#[pallet::config]
 	pub trait Config: frame_system::Config {
@@ -100,45 +102,50 @@ pub mod pallet {
 		/// - the pallet knows better header than the `finality_target`;
 		///
 		/// - justification is invalid;
+		/// 
+		/// For now, weights are incorrect.
 		#[pallet::call_index(0)]
-		#[pallet::weight((T::DbWeight::get().reads_writes(0, 0), DispatchClass::Operational))]
+		// TODO: Set correct weights
+		#[pallet::weight((T::DbWeight::get().reads_writes(1, 1), DispatchClass::Operational))]
 		pub fn submit_finality_proof(
 			origin: OriginFor<T>,
-			justification: AlephFullJustification<BridgedHeader<T>>,
+			header: BridgedHeader<T>,
+			encoded_justification: EncodedJustification,
 		) -> DispatchResultWithPostInfo {
 			Self::ensure_not_halted().map_err(Error::<T>::BridgeModule)?;
-			ensure_signed(origin)?;
 
-			let authority_set = <CurrentAuthoritySet<T>>::get();
-			let unused_proof_size = authority_set.unused_proof_size();
-			verify_justification::<T>(&justification)?;
-
-			let is_authorities_change_enacted =
-				try_enact_authority_change::<T>(&finality_target)?;
-			if may_refund_call_fee {
-				FreeMandatoryHeadersRemaining::<T, I>::mutate(|count| {
-					*count = count.saturating_sub(1)
-				});
+			// Check of obsolete header
+			if let Some(best_finalized_block) = Self::best_finalized() {
+				if header.number() <= &best_finalized_block.number() {
+					log::debug!(
+						target: LOG_TARGET,
+						"Skipping import of old header: {:?}.",
+						header.hash()
+					);
+					return Err(Error::<T>::ObsoleteHeader);
+				}
 			}
-			insert_header::<T>(justification.header());
+
+			// Decode justification
+			let justification = decode_versioned_aleph_justification(&mut encoded_justification.as_slice())
+				.map_err(|_| Error::<T>::InvalidJustification)?;
+			// Check justification
+			let authority_set = <CurrentAuthoritySet<T>>::get();
+			verify_justification::<BridgedHeader<T>>(&authority_set.into(), &AlephFullJustification{header, justification}).map_err(|_| Error::<T>::InvalidJustification)?;
+
+			// Check for authority set change digest
+			let is_authorities_change_enacted =
+				Self::try_enact_authority_change(&header)?;
+	
+			// Insert new header
+			Self::insert_header(header);
 			log::info!(
 				target: LOG_TARGET,
 				"Successfully imported finalized header with hash {:?}!",
-				hash
+				header.hash()
 			);
 
-			// the proof size component of the call weight assumes that there are
-			// `MaxBridgedAuthorities` in the `CurrentAuthoritySet` (we use `MaxEncodedLen`
-			// estimation). But if their number is lower, then we may "refund" some `proof_size`,
-			// making proof smaller and leaving block space to other useful transactions
-			let pre_dispatch_weight = T::WeightInfo::submit_finality_proof(
-				justification.commit.precommits.len().saturated_into(),
-				justification.votes_ancestries.len().saturated_into(),
-			);
-			let actual_weight = pre_dispatch_weight
-				.set_proof_size(pre_dispatch_weight.proof_size().saturating_sub(unused_proof_size));
-
-			Self::deposit_event(Event::UpdatedBestFinalizedHeader { number, hash });
+			Self::deposit_event(Event::UpdatedBestFinalizedHeader { number: *header.number(), hash: header.hash() });
 
 			Ok(().into())
 		}
@@ -165,6 +172,7 @@ pub mod pallet {
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
 
+			// Check if already initialized
 			let init_allowed = !<BestFinalized<T>>::exists();
 			ensure!(init_allowed, <Error<T>>::AlreadyInitialized);
 			Self::initialize_bridge(init_data.clone())?;
@@ -269,6 +277,7 @@ pub mod pallet {
 	}
 
 	#[pallet::event]
+	#[pallet::generate_deposit(pub(super) fn deposit_event)]
 	pub enum Event<T: Config> {
 		/// Best finalized chain header has been updated to the header with given number and hash.
 		UpdatedBestFinalizedHeader { number: BridgedBlockNumber<T>, hash: BridgedBlockHash<T> },
@@ -276,12 +285,16 @@ pub mod pallet {
 
 	#[pallet::error]
 	pub enum Error<T> {
+		/// The given justification is invalid for the given header.
+		InvalidJustification,
 		/// The header being imported is older than the best finalized header known to the pallet.
 		OldHeader,
 		/// The pallet is not yet initialized.
 		NotInitialized,
 		/// The pallet has already been initialized.
 		AlreadyInitialized,
+		/// Header is older than the last imported header.
+		ObsoleteHeader,
 		/// Too many authorities in the set.
 		TooManyAuthoritiesInSet,
 		/// Error generated by the `OwnedBridgeModule` trait.
@@ -294,17 +307,6 @@ pub mod pallet {
 		/// Note this function solely takes care of updating the storage and pruning old entries,
 		/// but does not verify the validity of such import.
 		pub(crate) fn insert_header(header: BridgedHeader<T>) {
-			if let Some(best_finalized_block) = Self::best_finalized() {
-				if header.number() <= &best_finalized_block.number() {
-					log::debug!(
-						target: LOG_TARGET,
-						"Skipping import of old header: {:?}.",
-						header.hash()
-					);
-					return
-				}
-			}
-
 			let hash = header.hash();
 			let index = <ImportedHashesPointer<T>>::get();
 			let pruning = <ImportedHashes<T>>::try_get(index);
@@ -322,7 +324,7 @@ pub mod pallet {
 
 		/// Since this writes to storage with no real checks this should only be used in functions
 		/// that were called by a trusted origin.
-		fn initialize_bridge(
+		pub(crate) fn initialize_bridge(
 			init_params: super::InitializationData<BridgedHeader<T>>,
 		) -> Result<(), Error<T>> {
 			let super::InitializationData { header, authority_list, operating_mode } = init_params;
@@ -345,6 +347,28 @@ pub mod pallet {
 			<PalletOperatingMode<T>>::put(operating_mode);
 
 			Ok(())
+		}
+
+		/// Check the given header for an authority set change. If a change
+		/// is found it will be enacted immediately.
+		pub(crate) fn try_enact_authority_change(
+			header: &BridgedHeader<T>,
+		) -> Result<bool, Error<T>> {
+			let mut change_enacted = false;
+
+			if let Some(change) = super::get_authority_change(header) {
+				let next_authorities = StoredAuthoritySet::<T>::try_new(change)?;
+				<CurrentAuthoritySet<T>>::put(&next_authorities);
+				change_enacted = true;
+
+				log::info!(
+					target: LOG_TARGET,
+					"New authorities are: {:?}",
+					next_authorities,
+				);
+			};
+
+			Ok(change_enacted)
 		}
 	}
 
@@ -375,6 +399,19 @@ impl<T: Config> HeaderChain<BridgedChain<T>> for AlephChainHeaders<T> {
 	) -> Option<HashOf<BridgedChain<T>>> {
 		ImportedHeaders::<T>::get(header_hash).map(|h| h.state_root)
 	}
+}
+
+pub(crate) fn get_authority_change<H: Header>(
+	header: &H,
+) -> Option<AuthoritySet> {
+	use sp_runtime::generic::OpaqueDigestItemId;
+	let id = OpaqueDigestItemId::Consensus(&ALEPH_ENGINE_ID);
+	let filter_log = |log: ConsensusLog| match log {
+		ConsensusLog::AlephAuthorityChange(change) => Some(change),
+		_ => None,
+	};
+
+	header.digest().convert_first(|l| l.try_to(id).and_then(filter_log))
 }
 
 #[cfg(test)]

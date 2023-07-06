@@ -1,5 +1,7 @@
 use codec::{Decode, Encode, Input};
+use scale_info::TypeInfo;
 use sp_runtime::{traits::Header as HeaderT, RuntimeAppPublic, RuntimeDebug};
+use sp_runtime::EncodedJustification;
 
 use crate::{AuthoritySet, AuthoritySignature};
 
@@ -11,7 +13,7 @@ pub struct SignatureSet<Signature>(pub aleph_bft_crypto::SignatureSet<Signature>
 
 /// A proof of block finality, currently in the form of a sufficiently long list of signatures or a
 /// sudo signature of a block for emergency finalization.
-#[derive(Clone, Decode, Debug, PartialEq, Eq)]
+#[derive(Clone, Encode, Decode, Debug, PartialEq, Eq)]
 pub enum AlephJustification {
 	CommitteeMultisignature(SignatureSet<Signature>),
 	EmergencySignature(AuthoritySignature),

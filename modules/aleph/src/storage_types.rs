@@ -26,8 +26,6 @@ use scale_info::TypeInfo;
 
 use sp_std::marker::PhantomData;
 
-pub type AuthorityList = Vec<AuthorityId>;
-
 /// A bounded list of AlephBFT authorities.
 pub type StoredAuthorityList<MaxBridgedAuthorities> =
 	BoundedVec<AuthorityId, MaxBridgedAuthorities>;
@@ -53,7 +51,7 @@ impl<T: Config> StoredAuthoritySet<T> {
 	/// Try to create a new bounded AlephBFT Authority Set from unbounded list.
 	///
 	/// Returns error if number of authorities in the provided list is too large.
-	pub fn try_new(authorities: AuthorityList) -> Result<Self, Error<T>> {
+	pub fn try_new(authorities: AuthoritySet) -> Result<Self, Error<T>> {
 		Ok(Self {
 			authorities: TryFrom::try_from(authorities)
 				.map_err(|_| Error::TooManyAuthoritiesInSet)?,
