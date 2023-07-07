@@ -1,4 +1,6 @@
-use aleph_parachain_runtime::{AccountId, AuraId, Signature, EXISTENTIAL_DEPOSIT, RuntimeGenesisConfig};
+use aleph_parachain_runtime::{
+	AccountId, AuraId, RuntimeGenesisConfig, Signature, SudoConfig, EXISTENTIAL_DEPOSIT,
+};
 use cumulus_primitives_core::ParaId;
 use sc_chain_spec::{ChainSpecExtension, ChainSpecGroup};
 use sc_service::ChainType;
@@ -7,8 +9,7 @@ use sp_core::{sr25519, Pair, Public};
 use sp_runtime::traits::{IdentifyAccount, Verify};
 
 /// Specialized `ChainSpec` for the normal parachain runtime.
-pub type ChainSpec =
-	sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
+pub type ChainSpec = sc_service::GenericChainSpec<RuntimeGenesisConfig, Extensions>;
 
 /// The default XCM version to set in genesis config.
 const SAFE_XCM_VERSION: u32 = xcm::prelude::XCM_VERSION;
@@ -218,5 +219,6 @@ fn testnet_genesis(
 			safe_xcm_version: Some(SAFE_XCM_VERSION),
 		},
 		transaction_payment: Default::default(),
+		sudo: SudoConfig { key: Some(get_account_id_from_seed::<sr25519::Public>("Alice")) },
 	}
 }
