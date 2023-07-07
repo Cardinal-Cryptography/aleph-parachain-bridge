@@ -15,8 +15,6 @@
 // along with Parity Bridges Common.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Utilities for working with test accounts.
-
-use bp_aleph_header_chain::AuthorityId as AlephAuthorityId;
 use codec::Encode;
 use ed25519_dalek::{Keypair, PublicKey, SecretKey, Signature};
 use finality_grandpa::voter_set::VoterSet;
@@ -69,12 +67,6 @@ impl Account {
 }
 
 impl From<Account> for AuthorityId {
-	fn from(p: Account) -> Self {
-		sp_application_crypto::UncheckedFrom::unchecked_from(p.public().to_bytes())
-	}
-}
-
-impl From<Account> for AlephAuthorityId {
 	fn from(p: Account) -> Self {
 		sp_application_crypto::UncheckedFrom::unchecked_from(p.public().to_bytes())
 	}

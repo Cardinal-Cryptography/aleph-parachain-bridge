@@ -44,9 +44,9 @@ pub type AuthoritySet = Vec<AuthorityId>;
 #[cfg_attr(feature = "std", derive(Serialize))]
 #[derive(Decode, Encode, PartialEq, Eq, Clone, sp_runtime::RuntimeDebug)]
 pub enum ConsensusLog {
-    /// Change of the authorities.
-    #[codec(index = 1)]
-    AlephAuthorityChange(Vec<AuthorityId>),
+	/// Change of the authorities.
+	#[codec(index = 1)]
+	AlephAuthorityChange(Vec<AuthorityId>),
 }
 
 /// Data required for initializing the Aleph bridge pallet.

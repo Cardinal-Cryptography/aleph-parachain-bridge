@@ -6,7 +6,6 @@ edition = "2021"
 license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
 
 [dependencies]
-bp-aleph-header-chain = { path = "../aleph-header-chain", default-features = false }
 bp-header-chain = { path = "../header-chain", default-features = false  }
 bp-parachains = { path = "../parachains", default-features = false }
 bp-polkadot-core = { path = "../polkadot-core", default-features = false  }
