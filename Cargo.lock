@@ -263,6 +263,7 @@ dependencies = [
  "pallet-aura",
  "pallet-authorship",
  "pallet-balances",
+ "pallet-bridge-aleph",
  "pallet-collator-selection",
  "pallet-multisig",
  "pallet-preimage",

@@ -33,7 +33,7 @@ use bp_aleph_header_chain::{
 };
 use bp_header_chain::{HeaderChain, StoredHeaderData, StoredHeaderDataBuilder};
 use bp_runtime::{BlockNumberOf, HashOf, HasherOf, HeaderId, HeaderOf, OwnedBridgeModule};
-use frame_support::sp_runtime::traits::Header;
+use frame_support::{sp_runtime::traits::Header, DefaultNoBound};
 
 #[cfg(test)]
 mod mock;
@@ -252,16 +252,10 @@ pub mod pallet {
 	pub type PalletOperatingMode<T: Config> = StorageValue<_, BasicOperatingMode, ValueQuery>;
 
 	#[pallet::genesis_config]
+	#[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
 		pub owner: Option<T::AccountId>,
 		pub init_data: Option<super::InitializationData<BridgedHeader<T>>>,
-	}
-
-	#[cfg(feature = "std")]
-	impl<T: Config> Default for GenesisConfig<T> {
-		fn default() -> Self {
-			Self { owner: None, init_data: None }
-		}
 	}
 
 	#[pallet::genesis_build]

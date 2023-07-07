@@ -1,17 +1,17 @@
 use codec::{Decode, Encode, Input};
 use frame_support::PalletError;
 use sp_runtime::{traits::Header as HeaderT, RuntimeAppPublic, RuntimeDebug};
+use sp_std::{vec, vec::Vec};
 
 use crate::{AuthoritySet, AuthoritySignature};
 use scale_info::TypeInfo;
-use std::collections::HashMap;
 
-#[derive(TypeInfo, PartialEq, Eq, Clone, Debug, Hash, Decode, Encode)]
+#[derive(TypeInfo, PartialEq, Eq, Clone, Debug, Decode, Encode)]
 pub struct Signature(AuthoritySignature);
 
 // This could be pulled from aleph_bft_cryto, but we need to implement TypeInfo for it.
 // TODO: add TypeInfo to aleph_bft_crypto::NodeMap and reuse it here.
-#[derive(TypeInfo, Clone, Eq, PartialEq, Hash, Debug, Default, Decode, Encode)]
+#[derive(TypeInfo, Clone, Eq, PartialEq, Debug, Default, Decode, Encode)]
 pub struct SignatureSet(Vec<Option<Signature>>);
 
 impl SignatureSet {
@@ -19,15 +19,6 @@ impl SignatureSet {
 	pub fn with_size(len: usize) -> Self {
 		let v = vec![None; len];
 		SignatureSet(v)
-	}
-
-	pub fn from_hashmap(len: usize, hashmap: HashMap<usize, Signature>) -> Self {
-		let v = vec![None; len];
-		let mut nm = SignatureSet(v);
-		for (id, item) in hashmap.into_iter() {
-			nm.insert(id, item);
-		}
-		nm
 	}
 
 	pub fn size(&self) -> usize {
@@ -148,6 +139,7 @@ pub fn verify_justification<Header: HeaderT>(
 	}
 }
 
+#[cfg(test)]
 pub mod test_utils {
 	use super::*;
 	use crate::AuthorityId;
@@ -192,14 +184,14 @@ pub mod test_utils {
 	}
 
 	pub fn generate_signature_set(header: &Header, seeds: &Seeds) -> SignatureSet {
-		let mut hashmap = HashMap::new();
-		for (index, authority) in seeds.iter().enumerate() {
+		let mut signatures = Vec::new();
+		for authority in seeds.iter() {
 			let aleph_authority = pair_from_seed(authority);
 			let signature = aleph_authority.sign(&header.hash().encode());
-			hashmap.insert(index, Signature(signature));
+			signatures.push(Some(Signature(signature)));
 		}
 
-		SignatureSet::from_hashmap(seeds.len(), hashmap)
+		SignatureSet(signatures)
 	}
 
 	pub fn generate_justification(header: &Header, seeds: &Seeds) -> AlephJustification {
