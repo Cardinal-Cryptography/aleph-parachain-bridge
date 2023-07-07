@@ -1,4 +1,5 @@
 use codec::{Decode, Encode, Input};
+use frame_support::PalletError;
 use sp_runtime::{traits::Header as HeaderT, RuntimeAppPublic, RuntimeDebug};
 
 use crate::{AuthoritySet, AuthoritySignature};
@@ -111,7 +112,7 @@ impl<H: HeaderT> bp_header_chain::FinalityProof<H::Number> for AlephFullJustific
 	}
 }
 
-#[derive(Eq, RuntimeDebug, PartialEq)]
+#[derive(Eq, RuntimeDebug, PartialEq, Encode, Decode, TypeInfo, PalletError)]
 pub enum Error {
 	UnsupportedJustificationVersion,
 	JustificationNotDecodable,

@@ -134,7 +134,7 @@ pub mod pallet {
 				&header,
 				&justification,
 			)
-			.map_err(|_| Error::<T>::InvalidJustification)?;
+			.map_err(|verification_err| Error::<T>::InvalidJustification(verification_err))?;
 
 			// Check for authority set change digest
 			Self::try_enact_authority_change(&header)?;
@@ -291,7 +291,7 @@ pub mod pallet {
 	#[pallet::error]
 	pub enum Error<T> {
 		/// The given justification is invalid for the given header.
-		InvalidJustification,
+		InvalidJustification(bp_aleph_header_chain::aleph_justification::Error),
 		/// The header being imported is older than the best finalized header known to the pallet.
 		OldHeader,
 		/// The pallet is not yet initialized.
