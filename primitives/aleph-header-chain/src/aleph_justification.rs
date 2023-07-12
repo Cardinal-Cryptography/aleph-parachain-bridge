@@ -139,23 +139,17 @@ pub fn verify_justification<Header: HeaderT>(
 	}
 }
 
-#[cfg(test)]
+#[cfg(feature = "std")]
 pub mod test_utils {
 	use super::*;
 	use crate::AuthorityId;
-	use bp_test_utils::Account;
+	//use bp_test_utils::Account;
 	use hex::FromHex;
 	use sp_application_crypto::Pair;
 	use sp_runtime::{testing::Header, ConsensusEngineId};
 
 	pub type Seed = [u8; 32];
 	pub type Seeds = Vec<Seed>;
-
-	impl From<Account> for AuthorityId {
-		fn from(p: Account) -> Self {
-			sp_application_crypto::UncheckedFrom::unchecked_from(p.public().to_bytes())
-		}
-	}
 
 	pub fn generate_seeds(size: usize) -> Seeds {
 		let mut seed = [0u8; 32];

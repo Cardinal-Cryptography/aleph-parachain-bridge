@@ -428,10 +428,15 @@ mod tests {
 		assert_noop, assert_ok, dispatch::PostDispatchInfo, storage::generator::StorageValue,
 	};
 	use hex::FromHex;
+	use sp_core::crypto::UncheckedFrom;
 	use sp_runtime::{Digest, DigestItem, DispatchError};
 
+	fn authority_id_from_account(account: Account) -> AuthorityId {
+		UncheckedFrom::unchecked_from(account.public().to_bytes())
+	}
+
 	fn into_authority_set(accounts: Vec<Account>) -> Vec<AuthorityId> {
-		accounts.into_iter().map(|a| AuthorityId::from(a)).collect()
+		accounts.into_iter().map(|a| authority_id_from_account(a)).collect()
 	}
 
 	fn initialize_with_custom_data(init_data: InitializationData<TestHeader>) {
@@ -766,7 +771,9 @@ mod tests {
 			let (_authority_set, header, justification) = devnet_header_and_justification_3();
 			assert_noop!(
 				Aleph::submit_finality_proof(RuntimeOrigin::signed(1), header, justification),
-				Error::<TestRuntime>::InvalidJustification
+				Error::<TestRuntime>::InvalidJustification(
+					bp_aleph_header_chain::aleph_justification::Error::NotEnoughCorrectSignatures
+				)
 			);
 		})
 	}
