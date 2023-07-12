@@ -70,6 +70,9 @@ cumulus-primitives-utility = { git = "https://github.com/paritytech/cumulus.git"
 pallet-collator-selection = { git = "https://github.com/paritytech/cumulus.git", branch = "master", default-features = false }
 parachain-info = { git = "https://github.com/paritytech/cumulus.git", branch = "master", default-features = false }
 
+# Bridge dependencies
+pallet-bridge-aleph = { path = "../../../modules/aleph", default-features = false }
+
 [features]
 default = [
 	"std",
@@ -93,6 +96,7 @@ std = [
 	"pallet-aura/std",
 	"pallet-authorship/std",
 	"pallet-balances/std",
+	"pallet-bridge-aleph/std",
 	"pallet-collator-selection/std",
 	"pallet-session/std",
 	"pallet-sudo/std",
