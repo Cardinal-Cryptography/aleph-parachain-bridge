@@ -77,6 +77,8 @@ parachain-info = { git = "https://github.com/paritytech/cumulus.git", branch = "
 
 # Bridge dependencies
 pallet-bridge-aleph = { path = "../../../modules/aleph", default-features = false }
+bp-aleph-zero = { path = "../../../primitives/chain-aleph-zero", default-features = false }
+bp-runtime = { path = "../../../primitives/runtime", default-features = false }
 
 [features]
 default = [
@@ -86,6 +88,8 @@ std = [
 	"codec/std",
 	"log/std",
 	"scale-info/std",
+	"bp-aleph-zero/std",
+	"bp-runtime/std",
 	"cumulus-pallet-aura-ext/std",
 	"cumulus-pallet-dmp-queue/std",
 	"cumulus-pallet-parachain-system/std",

@@ -49,7 +49,7 @@ pub enum AlephJustification {
 	EmergencySignature(AuthoritySignature),
 }
 
-#[derive(RuntimeDebug, Clone, PartialEq, Eq)]
+#[derive(RuntimeDebug, Clone, Encode, Decode, PartialEq, Eq)]
 pub struct AlephFullJustification<Header: HeaderT> {
 	header: Header,
 	justification: AlephJustification,

@@ -242,6 +242,8 @@ dependencies = [
 name = "aleph-parachain-runtime"
 version = "0.1.0"
 dependencies = [
+ "bp-aleph-zero",
+ "bp-runtime",
  "cumulus-pallet-aura-ext",
  "cumulus-pallet-dmp-queue",
  "cumulus-pallet-parachain-system",
@@ -970,6 +972,18 @@ dependencies = [
  "sp-core",
  "sp-runtime",
  "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=master)",
+]
+
+[[package]]
+name = "bp-aleph-zero"
+version = "0.1.0"
+dependencies = [
+ "bp-aleph-header-chain",
+ "bp-header-chain",
+ "bp-runtime",
+ "frame-support",
+ "sp-api",
+ "sp-core",
 ]
 
 [[package]]
@@ -10262,6 +10276,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
+ "bp-aleph-header-chain",
  "bp-header-chain",
  "bp-messages",
  "bp-polkadot-core",
@@ -13759,6 +13774,7 @@ dependencies = [
  "anyhow",
  "async-std",
  "async-trait",
+ "bp-aleph-header-chain",
  "bp-header-chain",
  "bp-messages",
  "bp-parachains",

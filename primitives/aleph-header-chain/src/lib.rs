@@ -22,8 +22,9 @@ use codec::{Decode, Encode};
 use core::{clone::Clone, cmp::Eq, default::Default, fmt::Debug};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
-use sp_runtime::{traits::Header as HeaderT, ConsensusEngineId, KeyTypeId, RuntimeDebug};
+use sp_runtime::{traits::Header as HeaderT, ConsensusEngineId, KeyTypeId, RuntimeDebug, Digest};
 use sp_std::{boxed::Box, vec::Vec};
+use bp_header_chain::ConsensusLogReader;
 
 pub mod aleph_justification;
 
@@ -77,5 +78,24 @@ pub trait ChainWithAleph: Chain {
 	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str;
 	const MAX_HEADER_SIZE: u32;
 	const MAX_AUTHORITIES_COUNT: u32;
-	const AVERAGE_HEADER_SIZE_IN_JUSTIFICATION: u32;
+}
+
+/// A struct that provides helper methods for querying Aleph consensus log.
+pub struct AlephConsensusLogReader;
+
+impl ConsensusLogReader for AlephConsensusLogReader {
+	fn schedules_authorities_change(digest: &Digest) -> bool {
+		get_authority_change(digest).is_some()
+	}
+}
+
+// Helper method for reading Aleph's consensus log.
+pub fn get_authority_change(digest: &Digest) -> Option<AuthoritySet> {
+	use sp_runtime::generic::OpaqueDigestItemId;
+	let id = OpaqueDigestItemId::Consensus(&ALEPH_ENGINE_ID);
+	let filter_log = |log: ConsensusLog| match log {
+		ConsensusLog::AlephAuthorityChange(change) => Some(change),
+	};
+
+	digest.convert_first(|l| l.try_to(id).and_then(filter_log))
 }

@@ -220,5 +220,6 @@ fn testnet_genesis(
 		},
 		transaction_payment: Default::default(),
 		sudo: SudoConfig { key: Some(get_account_id_from_seed::<sr25519::Public>("Alice")) },
+		bridge_aleph: Default::default(),
 	}
 }

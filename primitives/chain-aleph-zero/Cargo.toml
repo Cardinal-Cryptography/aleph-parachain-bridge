@@ -1,0 +1,32 @@
+[package]
+name = "bp-aleph-zero"
+description = "Primitives of Aleph Zero runtime."
+version = "0.1.0"
+authors = ["Cardinal Cryptography"]
+edition = "2021"
+license = "GPL-3.0-or-later WITH Classpath-exception-2.0"
+
+[dependencies]
+
+# Bridge Dependencies
+
+bp-header-chain = { path = "../header-chain", default-features = false }
+bp-aleph-header-chain = { path = "../aleph-header-chain", default-features = false }
+bp-runtime = { path = "../runtime", default-features = false }
+
+# Substrate Based Dependencies
+
+frame-support = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-api = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+sp-core = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
+
+[features]
+default = ["std"]
+std = [
+	"bp-aleph-header-chain/std",
+	"bp-header-chain/std",
+	"bp-runtime/std",
+	"frame-support/std",
+	"sp-api/std",
+	"sp-core/std",
+]

@@ -22,13 +22,17 @@ use bp_header_chain::{
 	justification::{verify_and_optimize_justification, GrandpaJustification},
 	ConsensusLogReader, FinalityProof, GrandpaConsensusLogReader,
 };
+use bp_aleph_header_chain::{
+	aleph_justification::{AlephFullJustification, AlephJustification, Error as AlephJustificationError},
+	AlephConsensusLogReader, InitializationData as AlephInitializationData,
+};
 use bp_runtime::{BasicOperatingMode, HeaderIdProvider, OperatingMode};
 use codec::{Decode, Encode};
 use finality_grandpa::voter_set::VoterSet;
 use futures::stream::StreamExt;
 use num_traits::{One, Zero};
 use relay_substrate_client::{
-	BlockNumberOf, Chain, ChainWithGrandpa, Client, Error as SubstrateError, HashOf, HeaderOf,
+	BlockNumberOf, Chain, ChainBase, ChainWithAleph, ChainWithGrandpa, Client, Error as SubstrateError, HashOf, HeaderOf,
 	Subscription,
 };
 use sp_consensus_grandpa::{AuthorityList as GrandpaAuthoritiesSet, GRANDPA_ENGINE_ID};
@@ -100,6 +104,46 @@ pub trait Engine<C: Chain>: Send {
 	async fn prepare_initialization_data(
 		client: impl Client<C>,
 	) -> Result<Self::InitializationData, Error<HashOf<C>, BlockNumberOf<C>>>;
+}
+
+/// Aleph finality engine.
+pub struct Aleph<C>(PhantomData<C>);
+
+#[async_trait]
+impl<C: ChainWithAleph> Engine<C> for Aleph<C> {
+	const ID: ConsensusEngineId = ConsensusEngineId::from(*b"alp0");
+	type ConsensusLogReader = AlephConsensusLogReader;
+	type FinalityProof = AlephFullJustification<<C as ChainBase>::Header>;
+	type InitializationData = AlephInitializationData<<C as ChainBase>::Header>;
+	type OperatingMode = BasicOperatingMode;
+
+	fn is_initialized_key() -> StorageKey {
+		bp_header_chain::storage_keys::best_finalized_key(C::WITH_CHAIN_ALEPH_PALLET_NAME)	
+	}
+
+	fn pallet_operating_mode_key() -> StorageKey {
+		bp_header_chain::storage_keys::pallet_operating_mode_key(C::WITH_CHAIN_ALEPH_PALLET_NAME)
+	}
+
+	async fn finality_proofs(
+		client: &impl Client<C>,
+	) -> Result<Subscription<Bytes>, SubstrateError> {
+		client.subscribe_aleph_finality_justifications().await
+	}
+
+	async fn optimize_proof<TargetChain: Chain>(
+		_target_client: &impl Client<TargetChain>,
+		_header: &C::Header,
+		proof: Self::FinalityProof,
+	) -> Result<Self::FinalityProof, SubstrateError> {
+		Ok(proof)
+	}
+
+	async fn prepare_initialization_data(
+		_client: impl Client<C>,
+	) -> Result<Self::InitializationData, Error<HashOf<C>, BlockNumberOf<C>>> {
+		panic!("This should be done by sudo.")
+	}
 }
 
 /// GRANDPA finality engine.

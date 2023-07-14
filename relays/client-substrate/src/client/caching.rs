@@ -28,6 +28,7 @@ use std::future::Future;
 
 use async_std::sync::{Arc, Mutex, RwLock};
 use async_trait::async_trait;
+use bp_aleph_header_chain::ChainWithAleph;
 use bp_runtime::UnverifiedStorageProof;
 use codec::Encode;
 use frame_support::weights::Weight;
@@ -217,6 +218,13 @@ impl<C: Chain, B: Client<C>> Client<C> for CachingClient<C, B> {
 			self.backend.subscribe_grandpa_finality_justifications(),
 		)
 		.await
+	}
+
+	async fn subscribe_aleph_finality_justifications(&self) -> Result<Subscription<Bytes>>
+	where
+		C: ChainWithAleph,
+	{
+		panic!("not implemented")
 	}
 
 	async fn subscribe_beefy_finality_justifications(&self) -> Result<Subscription<Bytes>> {

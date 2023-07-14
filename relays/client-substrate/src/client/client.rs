@@ -16,7 +16,7 @@
 
 use crate::{
 	error::{Error, Result},
-	AccountIdOf, AccountKeyPairOf, BlockNumberOf, Chain, ChainWithGrandpa, ChainWithTransactions,
+	AccountIdOf, AccountKeyPairOf, BlockNumberOf, Chain, ChainWithAleph, ChainWithGrandpa, ChainWithTransactions,
 	HashOf, HeaderIdOf, HeaderOf, IndexOf, SignedBlockOf, SimpleRuntimeVersion, Subscription,
 	TransactionTracker, UnsignedTransaction,
 };
@@ -78,6 +78,9 @@ pub trait Client<C: Chain>: 'static + Send + Sync + Clone + Debug {
 	async fn subscribe_grandpa_finality_justifications(&self) -> Result<Subscription<Bytes>>
 	where
 		C: ChainWithGrandpa;
+	async fn subscribe_aleph_finality_justifications(&self) -> Result<Subscription<Bytes>>
+	where
+		C: ChainWithAleph;
 	/// Subscribe to BEEFY finality justifications.
 	async fn subscribe_beefy_finality_justifications(&self) -> Result<Subscription<Bytes>>;
 

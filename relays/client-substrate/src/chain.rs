@@ -73,6 +73,19 @@ pub trait RelayChain: Chain {
 	const PARACHAINS_FINALITY_PALLET_NAME: &'static str;
 }
 
+pub trait ChainWithAleph: Chain {
+	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str;
+}
+
+impl<T> ChainWithAleph for T
+where
+	T: Chain + UnderlyingChainProvider,
+	T::Chain: bp_aleph_header_chain::ChainWithAleph,
+{
+	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str =
+		<T::Chain as bp_aleph_header_chain::ChainWithAleph>::WITH_CHAIN_ALEPH_PALLET_NAME;
+}
+
 /// Substrate-based chain that is using direct GRANDPA finality from minimal relay-client point of
 /// view.
 ///

@@ -36,6 +36,7 @@ use crate::{
 
 use async_std::sync::{Arc, Mutex, RwLock};
 use async_trait::async_trait;
+use bp_aleph_header_chain::ChainWithAleph;
 use bp_runtime::{HasherOf, HeaderIdProvider, UnverifiedStorageProof};
 use codec::Encode;
 use frame_support::weights::Weight;
@@ -308,6 +309,13 @@ impl<C: Chain> Client<C> for RpcClient<C> {
 			SubstrateGrandpaClient::<C>::subscribe_justifications(&*client).await
 		})
 		.await
+	}
+
+	async fn subscribe_aleph_finality_justifications(&self) -> Result<Subscription<Bytes>>
+	where
+		C: ChainWithAleph,
+	{
+		panic!("not implemented")
 	}
 
 	async fn subscribe_beefy_finality_justifications(&self) -> Result<Subscription<Bytes>> {

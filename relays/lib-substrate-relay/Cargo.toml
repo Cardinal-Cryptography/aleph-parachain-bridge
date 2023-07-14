@@ -18,6 +18,7 @@ log = "0.4.19"
 
 # Bridge dependencies
 
+bp-aleph-header-chain = { path = "../../primitives/aleph-header-chain" }
 bp-header-chain = { path = "../../primitives/header-chain" }
 bp-parachains = { path = "../../primitives/parachains" }
 bp-polkadot-core = { path = "../../primitives/polkadot-core" }

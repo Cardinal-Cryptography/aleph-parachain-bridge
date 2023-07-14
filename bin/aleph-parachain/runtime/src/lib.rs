@@ -480,6 +480,12 @@ impl pallet_utility::Config for Runtime {
 	type WeightInfo = pallet_utility::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_bridge_aleph::Config for Runtime {
+	type RuntimeEvent = RuntimeEvent;
+	type BridgedChain = bp_aleph_zero::AlephZero;
+	type HeadersToKeep = ConstU32<5>;
+}
+
 // Create the runtime by composing the FRAME pallets that were previously configured.
 construct_runtime!(
 	pub enum Runtime where
@@ -516,6 +522,9 @@ construct_runtime!(
 		// Handy utilities
 		Utility: pallet_utility = 50,
 		Scheduler: pallet_scheduler = 51,
+
+		// Bridge
+		BridgeAleph: pallet_bridge_aleph = 60,
 	}
 );
 
@@ -567,6 +576,12 @@ impl_runtime_apis! {
 
 		fn metadata_versions() -> sp_std::vec::Vec<u32> {
 			Runtime::metadata_versions()
+		}
+	}
+
+	impl bp_aleph_zero::AlephZeroFinalityApi<Block> for Runtime {
+		fn best_finalized() -> Option<bp_runtime::HeaderId<bp_aleph_zero::Hash, bp_aleph_zero::BlockNumber>> {
+			BridgeAleph::best_finalized()
 		}
 	}
 
