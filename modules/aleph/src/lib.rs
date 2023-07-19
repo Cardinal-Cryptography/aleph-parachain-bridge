@@ -32,8 +32,8 @@ use bp_aleph_header_chain::{
 	AuthoritySet, ChainWithAleph, ConsensusLog, InitializationData, ALEPH_ENGINE_ID,
 };
 use bp_header_chain::{HeaderChain, StoredHeaderData, StoredHeaderDataBuilder};
-use bp_runtime::{BlockNumberOf, HashOf, HasherOf, HeaderId, HeaderOf, OwnedBridgeModule};
-use frame_support::{sp_runtime::traits::Header, DefaultNoBound};
+use bp_runtime::{BlockNumberOf, HashOf, HeaderId, HeaderOf, OwnedBridgeModule};
+use frame_support::sp_runtime::traits::Header;
 
 #[cfg(test)]
 mod mock;
@@ -50,7 +50,6 @@ pub type BridgedChain<T> = <T as Config>::BridgedChain;
 pub type BridgedBlockNumber<T> = BlockNumberOf<<T as Config>::BridgedChain>;
 pub type BridgedBlockHash<T> = HashOf<<T as Config>::BridgedChain>;
 pub type BridgedBlockId<T> = HeaderId<BridgedBlockHash<T>, BridgedBlockNumber<T>>;
-pub type BridgedBlockHasher<T> = HasherOf<<T as Config>::BridgedChain>;
 pub type BridgedHeader<T> = HeaderOf<<T as Config>::BridgedChain>;
 pub type BridgedStoredHeaderData<T> = StoredHeaderData<BridgedBlockNumber<T>, BridgedBlockHash<T>>;
 
@@ -158,10 +157,9 @@ pub mod pallet {
 		/// Bootstrap the bridge pallet with an initial header and authority set from which to sync.
 		///
 		/// The initial configuration provided does not need to be the genesis header of the bridged
-		/// chain, it can be any arbitrary header. You can also provide the next scheduled set
-		/// change if it is already known.
+		/// chain, it can be any arbitrary header.
 		///
-		/// This function is only allowed to be called from a trusted origin and writes to storage
+		/// This function is only allowed to be called by a root origin and writes to storage
 		/// with practically no checks in terms of the validity of the data. It is important that
 		/// you ensure that valid data is being passed in.
 		///
@@ -170,16 +168,18 @@ pub mod pallet {
 		/// Note: It cannot be called once the bridge has been initialized.
 		/// To reinitialize the bridge, you must reinitialize the pallet.
 		#[pallet::call_index(1)]
-		#[pallet::weight((T::DbWeight::get().reads_writes(2, 5), DispatchClass::Operational))]
+		#[pallet::weight((T::DbWeight::get().reads_writes(3, 7), DispatchClass::Operational))]
 		pub fn initialize(
 			origin: OriginFor<T>,
 			init_data: super::InitializationData<BridgedHeader<T>>,
 		) -> DispatchResultWithPostInfo {
 			ensure_root(origin)?;
 
-			// Check if already initialized
+			// Ensure that the bridge has not been already initialized.
 			let init_allowed = !<BestFinalized<T>>::exists();
 			ensure!(init_allowed, <Error<T>>::AlreadyInitialized);
+
+			// Initialize the bridge.
 			Self::initialize_bridge(init_data.clone())?;
 
 			log::info!(
@@ -191,7 +191,19 @@ pub mod pallet {
 			Ok(().into())
 		}
 
+		/// Change `PalletOwner`.
+		///
+		/// May only be called either by root or current `PalletOwner`.
 		#[pallet::call_index(2)]
+		#[pallet::weight((T::DbWeight::get().reads_writes(1, 1), DispatchClass::Operational))]
+		pub fn set_owner(origin: OriginFor<T>, new_owner: Option<T::AccountId>) -> DispatchResult {
+			<Self as OwnedBridgeModule<_>>::set_owner(origin, new_owner)
+		}
+
+		/// Halt or resume all pallet operations.
+		///
+		/// May only be called either by root, or by `PalletOwner`.
+		#[pallet::call_index(3)]
 		#[pallet::weight((T::DbWeight::get().reads_writes(1, 1), DispatchClass::Operational))]
 		pub fn set_operating_mode(
 			origin: OriginFor<T>,
@@ -201,7 +213,7 @@ pub mod pallet {
 		}
 	}
 
-	/// Hash of the best finalized header.
+	/// Hash and number of the best finalized header.
 	#[pallet::storage]
 	#[pallet::getter(fn best_finalized)]
 	pub type BestFinalized<T: Config> = StorageValue<_, BridgedBlockId<T>, OptionQuery>;
@@ -212,24 +224,20 @@ pub mod pallet {
 		Hasher = Identity,
 		Key = u32,
 		Value = BridgedBlockHash<T>,
-		QueryKind = OptionQuery,
-		OnEmpty = GetDefault,
-		MaxValues = MaybeHeadersToKeep<T>,
+		MaxValues = HeadersToKeepOption<T>,
 	>;
 
 	/// Current ring buffer position.
 	#[pallet::storage]
 	pub(super) type ImportedHashesPointer<T: Config> = StorageValue<_, u32, ValueQuery>;
 
-	/// Relevant fields of imported headers.
+	/// A ring buffer for relevant fields of imported headers.
 	#[pallet::storage]
 	pub type ImportedHeaders<T: Config> = StorageMap<
 		Hasher = Identity,
 		Key = BridgedBlockHash<T>,
 		Value = BridgedStoredHeaderData<T>,
-		QueryKind = OptionQuery,
-		OnEmpty = GetDefault,
-		MaxValues = MaybeHeadersToKeep<T>,
+		MaxValues = HeadersToKeepOption<T>,
 	>;
 
 	/// The current Aleph Authority set.
@@ -238,10 +246,7 @@ pub mod pallet {
 
 	/// Optional pallet owner.
 	///
-	/// Pallet owner has the right to halt all pallet operations and then resume them. If it is
-	/// `None`, then there are no direct ways to halt/resume pallet operations, but other
-	/// runtime methods may still be used to do that (i.e. democracy::referendum to update halt
-	/// flag directly or call the `halt_operations`).
+	/// Pallet owner has the right to halt all pallet operations and then resume them.
 	#[pallet::storage]
 	pub type PalletOwner<T: Config> = StorageValue<_, T::AccountId, OptionQuery>;
 
@@ -252,10 +257,15 @@ pub mod pallet {
 	pub type PalletOperatingMode<T: Config> = StorageValue<_, BasicOperatingMode, ValueQuery>;
 
 	#[pallet::genesis_config]
-	#[derive(DefaultNoBound)]
 	pub struct GenesisConfig<T: Config> {
 		pub owner: Option<T::AccountId>,
 		pub init_data: Option<super::InitializationData<BridgedHeader<T>>>,
+	}
+
+	impl<T: Config> Default for GenesisConfig<T> {
+		fn default() -> Self {
+			Self { owner: None, init_data: None }
+		}
 	}
 
 	#[pallet::genesis_build]
@@ -306,16 +316,16 @@ pub mod pallet {
 		pub(crate) fn insert_header(header: BridgedHeader<T>) {
 			let hash = header.hash();
 			let index = <ImportedHashesPointer<T>>::get();
-			let pruning = <ImportedHashes<T>>::try_get(index);
+			let header_to_prune = <ImportedHashes<T>>::try_get(index).ok();
 			<BestFinalized<T>>::put(HeaderId(*header.number(), hash));
 			<ImportedHeaders<T>>::insert(hash, header.build());
 			<ImportedHashes<T>>::insert(index, hash);
 
 			// Update ring buffer pointer and remove old header.
 			<ImportedHashesPointer<T>>::put((index + 1) % T::HeadersToKeep::get());
-			if let Ok(hash) = pruning {
-				log::debug!(target: LOG_TARGET, "Pruning old header: {:?}.", hash);
-				<ImportedHeaders<T>>::remove(hash);
+			if let Some(pruned_header_hash) = header_to_prune {
+				log::debug!(target: LOG_TARGET, "Pruning old header: {:?}.", pruned_header_hash);
+				<ImportedHeaders<T>>::remove(pruned_header_hash);
 			}
 		}
 
@@ -327,14 +337,14 @@ pub mod pallet {
 			let super::InitializationData { header, authority_list, operating_mode } = init_params;
 			let authority_set_length = authority_list.len();
 			let authority_set = StoredAuthoritySet::<T>::try_new(authority_list)
-			.map_err(|e| {
+			.map_err(|err| {
 				log::error!(
 					target: LOG_TARGET,
 					"Failed to initialize bridge. Number of authorities in the set {} is larger than the configured value {}",
 					authority_set_length,
 					T::BridgedChain::MAX_AUTHORITIES_COUNT,
 				);
-				e
+				err
 			})?;
 
 			<ImportedHashesPointer<T>>::put(0);
@@ -370,10 +380,10 @@ pub mod pallet {
 	}
 
 	/// Adapter for using `Config::HeadersToKeep` as `MaxValues` bound in our storage maps.
-	pub struct MaybeHeadersToKeep<T>(PhantomData<T>);
+	// We need to use it since `StorageMap` implementation expects Get<Option<u32>> for `MaxValues`.
+	pub struct HeadersToKeepOption<T>(PhantomData<T>);
 
-	// this implementation is required to use the struct as `MaxValues`
-	impl<T: Config> Get<Option<u32>> for MaybeHeadersToKeep<T> {
+	impl<T: Config> Get<Option<u32>> for HeadersToKeepOption<T> {
 		fn get() -> Option<u32> {
 			Some(T::HeadersToKeep::get())
 		}
@@ -413,7 +423,6 @@ mod tests {
 	use super::*;
 	use crate::mock::{
 		run_test, test_header, Aleph, RuntimeOrigin, System, TestHeader, TestRuntime,
-		MAX_BRIDGED_AUTHORITIES, MAX_HEADERS_KEPT,
 	};
 	use bp_aleph_header_chain::{
 		aleph_justification::test_utils::{
@@ -481,7 +490,7 @@ mod tests {
 	}
 
 	#[test]
-	fn init_random_user_cannot_initialize_pallet() {
+	fn init_normal_user_cannot_initialize_pallet() {
 		run_test(|| {
 			assert_noop!(
 				init_with_origin(RuntimeOrigin::signed(1), test_init_data()),
@@ -541,7 +550,7 @@ mod tests {
 			let init_data = InitializationData {
 				header: Box::new(genesis),
 				authority_list: into_authority_set(
-					(0..(MAX_BRIDGED_AUTHORITIES as u16) + 1).map(|x| Account(x)).collect(),
+					(0..(<<TestRuntime as Config>::BridgedChain as ChainWithAleph>::MAX_AUTHORITIES_COUNT as u16) + 1).map(|x| Account(x)).collect(),
 				),
 				operating_mode: BasicOperatingMode::Normal,
 			};
@@ -607,20 +616,21 @@ mod tests {
 	fn insert_header_pruning() {
 		run_test(|| {
 			initialize_substrate_bridge();
+			let headers_to_keep = <TestRuntime as Config>::HeadersToKeep::get();
 
-			for i in 0..2 * MAX_HEADERS_KEPT {
+			for i in 0..2 * headers_to_keep {
 				let header = test_header(i as u64);
 				Aleph::insert_header(header.clone());
 			}
 
-			assert_eq!(ImportedHeaders::<TestRuntime>::iter().count(), MAX_HEADERS_KEPT as usize);
+			assert_eq!(ImportedHeaders::<TestRuntime>::iter().count(), headers_to_keep as usize);
 
-			for i in 0..MAX_HEADERS_KEPT {
+			for i in 0..headers_to_keep {
 				let header = test_header(i as u64);
 				assert!(!<ImportedHeaders<TestRuntime>>::contains_key(header.hash()));
 			}
 
-			for i in MAX_HEADERS_KEPT..2 * MAX_HEADERS_KEPT {
+			for i in headers_to_keep..2 * headers_to_keep {
 				let header = test_header(i as u64);
 				let hash = header.hash();
 				assert!(<ImportedHeaders<TestRuntime>>::contains_key(header.hash()));
@@ -793,6 +803,11 @@ mod tests {
 			assert_noop!(
 				Aleph::submit_finality_proof(RuntimeOrigin::signed(1), header, justification),
 				Error::<TestRuntime>::OldHeader
+			);
+
+			assert_eq!(
+				Aleph::best_finalized_number(),
+				Some(devnet_header_and_justification_2().1.number)
 			);
 		})
 	}

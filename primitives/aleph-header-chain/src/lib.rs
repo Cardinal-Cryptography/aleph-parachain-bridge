@@ -35,6 +35,10 @@ mod app {
 	app_crypto!(ed25519, crate::KEY_TYPE);
 }
 
+sp_application_crypto::with_pair! {
+	pub type AuthorityPair = app::Pair;
+}
+
 pub type AuthorityId = app::Public;
 pub type AuthoritySignature = app::Signature;
 pub type AuthoritySet = Vec<AuthorityId>;
@@ -75,7 +79,5 @@ pub type BridgeAlephCallOf<C> = BridgeAlephCall<HeaderOf<C>>;
 
 pub trait ChainWithAleph: Chain {
 	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str;
-	const MAX_HEADER_SIZE: u32;
 	const MAX_AUTHORITIES_COUNT: u32;
-	const AVERAGE_HEADER_SIZE_IN_JUSTIFICATION: u32;
 }

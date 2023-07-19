@@ -23,11 +23,8 @@ sp-runtime = { git = "https://github.com/paritytech/substrate", branch = "master
 sp-std = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 sp-trie = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false }
 
-# Optional Benchmarking Dependencies
-bp-test-utils = { path = "../../primitives/test-utils", default-features = false, optional = true }
-frame-benchmarking = { git = "https://github.com/paritytech/substrate", branch = "master", default-features = false, optional = true }
-
 [dev-dependencies]
+bp-test-utils = { path = "../../primitives/test-utils", default-features = false }
 sp-core = { git = "https://github.com/paritytech/substrate", branch = "master" }
 sp-io = { git = "https://github.com/paritytech/substrate", branch = "master" }
 hex = "0.4"
@@ -42,16 +39,11 @@ std = [
 	"codec/std",
 	"frame-support/std",
 	"frame-system/std",
-	"frame-benchmarking/std",
 	"log/std",
 	"scale-info/std",
 	"sp-runtime/std",
 	"sp-std/std",
 	"sp-trie/std",
-]
-runtime-benchmarks = [
-	"bp-test-utils",
-	"frame-benchmarking/runtime-benchmarks",
 ]
 try-runtime = [
 	"frame-support/try-runtime",
