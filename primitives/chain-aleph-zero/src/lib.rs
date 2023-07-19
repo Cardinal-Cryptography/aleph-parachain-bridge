@@ -53,7 +53,7 @@ impl Chain for AlephZero {
 }
 
 impl ChainWithAleph for AlephZero {
-	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str = "Aleph";
+	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str = "BridgeAleph";
 	const MAX_AUTHORITIES_COUNT: u32 = MAX_AUTHORITIES_COUNT;
 	const MAX_HEADER_SIZE: u32 = MAX_HEADER_SIZE;
 }

@@ -16,7 +16,7 @@
 
 use crate::{
 	error::{Error, Result},
-	AccountIdOf, AccountKeyPairOf, BlockNumberOf, Chain, ChainWithAleph, ChainWithGrandpa, ChainWithTransactions,
+	AccountIdOf, AccountKeyPairOf, BlockNumberOf, Chain, ChainWithGrandpa, ChainWithTransactions,
 	HashOf, HeaderIdOf, HeaderOf, IndexOf, SignedBlockOf, SimpleRuntimeVersion, Subscription,
 	TransactionTracker, UnsignedTransaction,
 };
@@ -60,10 +60,12 @@ pub trait Client<C: Chain>: 'static + Send + Sync + Clone + Debug {
 	async fn best_finalized_header_hash(&self) -> Result<HashOf<C>>;
 	/// Get best finalized header number.
 	async fn best_finalized_header_number(&self) -> Result<BlockNumberOf<C>> {
+		log::debug!("best_finalized_header_number");
 		Ok(*self.best_finalized_header().await?.number())
 	}
 	/// Get best finalized header.
 	async fn best_finalized_header(&self) -> Result<HeaderOf<C>> {
+		log::debug!("best_finalized_header");
 		self.header_by_hash(self.best_finalized_header_hash().await?).await
 	}
 
@@ -78,9 +80,7 @@ pub trait Client<C: Chain>: 'static + Send + Sync + Clone + Debug {
 	async fn subscribe_grandpa_finality_justifications(&self) -> Result<Subscription<Bytes>>
 	where
 		C: ChainWithGrandpa;
-	async fn subscribe_aleph_finality_justifications(&self) -> Result<Subscription<Bytes>>
-	where
-		C: ChainWithAleph;
+
 	/// Subscribe to BEEFY finality justifications.
 	async fn subscribe_beefy_finality_justifications(&self) -> Result<Subscription<Bytes>>;
 

@@ -16,6 +16,7 @@
 
 //! Declaration of all bridges that the relay is able to serve.
 
+pub mod aleph_parachain_aleph_zero;
 pub mod kusama_polkadot;
 pub mod rialto_millau;
 pub mod rialto_parachain_millau;

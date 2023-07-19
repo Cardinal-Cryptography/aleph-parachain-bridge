@@ -21,6 +21,7 @@ use structopt::StructOpt;
 use strum::{EnumString, EnumVariantNames, VariantNames};
 
 use crate::bridges::{
+	aleph_parachain_aleph_zero::aleph_zero_headers_to_aleph_parachain::AlephZeroToAlephParachainCliBridge,
 	kusama_polkadot::{
 		kusama_headers_to_bridge_hub_polkadot::KusamaToBridgeHubPolkadotCliBridge,
 		polkadot_headers_to_bridge_hub_kusama::PolkadotToBridgeHubKusamaCliBridge,
@@ -66,6 +67,7 @@ pub struct RelayHeaders {
 #[strum(serialize_all = "kebab_case")]
 /// Headers relay bridge.
 pub enum RelayHeadersBridge {
+	AlephZeroToAlephParachain,
 	MillauToRialto,
 	RialtoToMillau,
 	WestendToMillau,
@@ -114,6 +116,7 @@ where
 	}
 }
 
+impl HeadersRelayer for AlephZeroToAlephParachainCliBridge {}
 impl HeadersRelayer for MillauToRialtoCliBridge {}
 impl HeadersRelayer for RialtoToMillauCliBridge {}
 impl HeadersRelayer for WestendToMillauCliBridge {}
@@ -127,6 +130,8 @@ impl RelayHeaders {
 	/// Run the command.
 	pub async fn run(self) -> anyhow::Result<()> {
 		match self.bridge {
+			RelayHeadersBridge::AlephZeroToAlephParachain =>
+				AlephZeroToAlephParachainCliBridge::relay_headers(self),
 			RelayHeadersBridge::MillauToRialto => MillauToRialtoCliBridge::relay_headers(self),
 			RelayHeadersBridge::RialtoToMillau => RialtoToMillauCliBridge::relay_headers(self),
 			RelayHeadersBridge::WestendToMillau => WestendToMillauCliBridge::relay_headers(self),

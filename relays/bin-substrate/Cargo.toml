@@ -23,6 +23,7 @@ signal-hook-async-std = "0.2.2"
 strum = { version = "0.25.0", features = ["derive"] }
 
 # Bridge dependencies
+bp-aleph-header-chain = { path = "../../primitives/aleph-header-chain" }
 bp-header-chain = { path = "../../primitives/header-chain" }
 bp-messages = { path = "../../primitives/messages" }
 bp-parachains = { path = "../../primitives/parachains" }
@@ -36,6 +37,8 @@ millau-runtime = { path = "../../bin/millau/runtime" }
 pallet-bridge-parachains = { path = "../../modules/parachains" }
 pallet-bridge-messages = { path = "../../modules/messages" }
 parachains-relay = { path = "../parachains" }
+relay-aleph-parachain-client = { path = "../client-aleph-parachain" }
+relay-aleph-zero-client = { path = "../client-aleph-zero" }
 relay-millau-client = { path = "../client-millau" }
 relay-rialto-client = { path = "../client-rialto" }
 relay-rialto-parachain-client = { path = "../client-rialto-parachain" }

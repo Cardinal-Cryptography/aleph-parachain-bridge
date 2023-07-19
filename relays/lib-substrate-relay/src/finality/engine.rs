@@ -23,7 +23,7 @@ use bp_header_chain::{
 	ConsensusLogReader, FinalityProof, GrandpaConsensusLogReader,
 };
 use bp_aleph_header_chain::{
-	aleph_justification::{AlephFullJustification, AlephJustification, Error as AlephJustificationError},
+	aleph_justification::AlephFullJustification,
 	AlephConsensusLogReader, InitializationData as AlephInitializationData,
 };
 use bp_runtime::{BasicOperatingMode, HeaderIdProvider, OperatingMode};
@@ -33,7 +33,7 @@ use futures::stream::StreamExt;
 use num_traits::{One, Zero};
 use relay_substrate_client::{
 	BlockNumberOf, Chain, ChainBase, ChainWithAleph, ChainWithGrandpa, Client, Error as SubstrateError, HashOf, HeaderOf,
-	Subscription,
+	Subscription, StreamDescription,
 };
 use sp_consensus_grandpa::{AuthorityList as GrandpaAuthoritiesSet, GRANDPA_ENGINE_ID};
 use sp_core::{storage::StorageKey, Bytes};
@@ -64,6 +64,9 @@ pub trait Engine<C: Chain>: Send {
 	async fn is_initialized<TargetChain: Chain>(
 		target_client: &impl Client<TargetChain>,
 	) -> Result<bool, SubstrateError> {
+
+		log::debug!("Checking if finality pallet at the bridged chain has already been initialized under the key {:?}.", Self::is_initialized_key());
+
 		Ok(target_client
 			.raw_storage_value(target_client.best_header_hash().await?, Self::is_initialized_key())
 			.await?
@@ -107,11 +110,11 @@ pub trait Engine<C: Chain>: Send {
 }
 
 /// Aleph finality engine.
-pub struct Aleph<C>(PhantomData<C>);
+pub struct AlephEngine<C>(PhantomData<C>);
 
 #[async_trait]
-impl<C: ChainWithAleph> Engine<C> for Aleph<C> {
-	const ID: ConsensusEngineId = ConsensusEngineId::from(*b"alp0");
+impl<C: ChainWithAleph> Engine<C> for AlephEngine<C> {
+	const ID: ConsensusEngineId = bp_aleph_header_chain::ALEPH_ENGINE_ID;
 	type ConsensusLogReader = AlephConsensusLogReader;
 	type FinalityProof = AlephFullJustification<<C as ChainBase>::Header>;
 	type InitializationData = AlephInitializationData<<C as ChainBase>::Header>;
@@ -128,7 +131,12 @@ impl<C: ChainWithAleph> Engine<C> for Aleph<C> {
 	async fn finality_proofs(
 		client: &impl Client<C>,
 	) -> Result<Subscription<Bytes>, SubstrateError> {
-		client.subscribe_aleph_finality_justifications().await
+		// It's only used alongside with a proper way to fetch justifications (query per block), 
+		// so this can just provide an empty stream.
+		Ok(Subscription::new_forwarded(
+			StreamDescription::new("Empty Aleph justification stream".into(), C::NAME.into()),
+			futures::stream::empty(),
+		))
 	}
 
 	async fn optimize_proof<TargetChain: Chain>(

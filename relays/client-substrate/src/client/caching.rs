@@ -28,7 +28,6 @@ use std::future::Future;
 
 use async_std::sync::{Arc, Mutex, RwLock};
 use async_trait::async_trait;
-use bp_aleph_header_chain::ChainWithAleph;
 use bp_runtime::UnverifiedStorageProof;
 use codec::Encode;
 use frame_support::weights::Weight;
@@ -179,6 +178,7 @@ impl<C: Chain, B: Client<C>> Client<C> for CachingClient<C, B> {
 	}
 
 	async fn header_by_hash(&self, hash: HashOf<C>) -> Result<HeaderOf<C>> {
+		log::debug!(target: "bridge-caching-client", "Fetching header by hash {}", hash);
 		self.get_or_insert_async(
 			&self.data.header_by_hash_cache,
 			&hash,
@@ -199,6 +199,7 @@ impl<C: Chain, B: Client<C>> Client<C> for CachingClient<C, B> {
 	async fn best_finalized_header_hash(&self) -> Result<HashOf<C>> {
 		// TODO: after https://github.com/paritytech/parity-bridges-common/issues/2074 we may
 		// use single-value-cache here, but for now let's just call the backend
+		log::debug!(target: "bridge-caching-client", "Fetching best finalized header hash");
 		self.backend.best_finalized_header_hash().await
 	}
 
@@ -218,13 +219,6 @@ impl<C: Chain, B: Client<C>> Client<C> for CachingClient<C, B> {
 			self.backend.subscribe_grandpa_finality_justifications(),
 		)
 		.await
-	}
-
-	async fn subscribe_aleph_finality_justifications(&self) -> Result<Subscription<Bytes>>
-	where
-		C: ChainWithAleph,
-	{
-		panic!("not implemented")
 	}
 
 	async fn subscribe_beefy_finality_justifications(&self) -> Result<Subscription<Bytes>> {

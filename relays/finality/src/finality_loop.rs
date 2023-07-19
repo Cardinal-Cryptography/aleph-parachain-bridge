@@ -400,11 +400,27 @@ where
 	SC: SourceClient<P>,
 	TC: TargetClient<P>,
 {
+	log::debug!("Starting finality sync loop iteration");
+
 	// read best source headers ids from source and target nodes
 	let best_number_at_source =
 		source_client.best_finalized_block_number().await.map_err(Error::Source)?;
+
+	log::debug!(
+		"Best finalized block number at source node ({}): {:?}",
+		P::SOURCE_NAME,
+		best_number_at_source,
+	);
+
 	let best_id_at_target =
 		target_client.best_finalized_source_block_id().await.map_err(Error::Target)?;
+	
+	log::debug!(
+		"Best finalized block number at target node ({}): {:?}",
+		P::TARGET_NAME,
+		best_id_at_target.0,
+	);
+
 	let best_number_at_target = best_id_at_target.0;
 
 	let different_hash_at_source = ensure_same_fork::<P, _>(&best_id_at_target, source_client)
@@ -441,6 +457,8 @@ where
 			return Ok(None)
 		}
 	}
+
+	log::debug!("Selecting header to submit");
 
 	// submit new header if we have something new
 	match select_header_to_submit(
@@ -479,8 +497,7 @@ where
 	TC: TargetClient<P>,
 {
 	// to see that the loop is progressing
-	log::trace!(
-		target: "bridge",
+	log::debug!(
 		"Considering range of headers ({:?}; {:?}]",
 		best_number_at_target,
 		best_number_at_source,
@@ -578,6 +595,9 @@ pub(crate) async fn read_missing_headers<
 	let mut unjustified_headers = Vec::new();
 	let mut selected_finality_proof = None;
 	let mut header_number = best_number_at_target + One::one();
+
+	log::debug!("Reading missing headers from {:?} to {:?}", header_number, best_number_at_source);
+
 	while header_number <= best_number_at_source {
 		let (header, finality_proof) = source_client
 			.header_and_finality_proof(header_number)
@@ -587,12 +607,12 @@ pub(crate) async fn read_missing_headers<
 
 		match (is_mandatory, finality_proof) {
 			(true, Some(finality_proof)) => {
-				log::trace!(target: "bridge", "Header {:?} is mandatory", header_number);
+				log::debug!("Header {:?} is mandatory", header_number);
 				return Ok(SelectedFinalityProof::Mandatory(header, finality_proof))
 			},
 			(true, None) => return Err(Error::MissingMandatoryFinalityProof(header.number())),
 			(false, Some(finality_proof)) => {
-				log::trace!(target: "bridge", "Header {:?} has persistent finality proof", header_number);
+				log::debug!("Header {:?} has persistent finality proof", header_number);
 				unjustified_headers.clear();
 				selected_finality_proof = Some((header, finality_proof));
 			},
@@ -604,7 +624,7 @@ pub(crate) async fn read_missing_headers<
 		header_number = header_number + One::one();
 	}
 
-	log::trace!(
+	log::debug!(
 		target: "bridge",
 		"Read {} {} headers. Selected finality proof for header: {:?}",
 		best_number_at_source.saturating_sub(best_number_at_target),
@@ -752,7 +772,6 @@ fn print_sync_progress<P: FinalitySyncPipeline>(
 	}
 
 	log::info!(
-		target: "bridge",
 		"Synced {:?} of {:?} headers",
 		best_number_at_target,
 		best_number_at_source,

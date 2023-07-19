@@ -57,7 +57,12 @@ impl<P: SubstrateFinalitySyncPipeline, TargetClnt: Client<P::TargetChain>>
 			return Err(Error::BridgePalletIsHalted)
 		}
 
+		log::info!("Bridge pallet is active");
+
 		let is_initialized = P::FinalityEngine::is_initialized(&self.client).await?;
+
+		log::info!("Bridge pallet is initialized: {}", is_initialized);
+		
 		if !is_initialized {
 			return Err(Error::BridgePalletIsNotInitialized)
 		}
@@ -97,11 +102,15 @@ where
 	type TransactionTracker = TransactionTracker<P::TargetChain, TargetClnt>;
 
 	async fn best_finalized_source_block_id(&self) -> Result<HeaderIdOf<P::SourceChain>, Error> {
+		log::debug!("best_finalized_source_block_id");
+
 		// we can't continue to relay finality if target node is out of sync, because
 		// it may have already received (some of) headers that we're going to relay
 		self.client.ensure_synced().await?;
 		// we can't relay finality if bridge pallet at target chain is halted
 		self.ensure_pallet_active().await?;
+
+		log::debug!("best_finalized_source_block_id: reading client state");
 
 		Ok(crate::messages::source::read_client_state::<P::TargetChain, P::SourceChain>(
 			&self.client,

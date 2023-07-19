@@ -975,6 +975,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "bp-aleph-parachain"
+version = "0.1.0"
+dependencies = [
+ "bp-bridge-hub-cumulus",
+ "bp-messages",
+ "bp-polkadot-core",
+ "bp-runtime",
+ "frame-support",
+ "frame-system",
+ "sp-api",
+ "sp-core",
+ "sp-runtime",
+ "sp-std 8.0.0 (git+https://github.com/paritytech/substrate?branch=master)",
+]
+
+[[package]]
 name = "bp-aleph-zero"
 version = "0.1.0"
 dependencies = [
@@ -10109,6 +10125,42 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "436b050e76ed2903236f032a59761c1eb99e1b0aead2c257922771dab1fc8c78"
 
 [[package]]
+name = "relay-aleph-parachain-client"
+version = "0.1.0"
+dependencies = [
+ "bp-aleph-header-chain",
+ "bp-aleph-parachain",
+ "bp-bridge-hub-cumulus",
+ "bp-header-chain",
+ "bp-polkadot-core",
+ "bridge-runtime-common",
+ "parity-scale-codec",
+ "relay-substrate-client",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-weights",
+ "subxt",
+]
+
+[[package]]
+name = "relay-aleph-zero-client"
+version = "0.1.0"
+dependencies = [
+ "bp-aleph-zero",
+ "bp-header-chain",
+ "bp-polkadot-core",
+ "bridge-runtime-common",
+ "parity-scale-codec",
+ "relay-substrate-client",
+ "scale-info",
+ "sp-core",
+ "sp-runtime",
+ "sp-weights",
+ "subxt",
+]
+
+[[package]]
 name = "relay-bridge-hub-kusama-client"
 version = "0.1.0"
 dependencies = [
@@ -13709,6 +13761,7 @@ dependencies = [
  "anyhow",
  "async-std",
  "async-trait",
+ "bp-aleph-header-chain",
  "bp-header-chain",
  "bp-messages",
  "bp-millau",
@@ -13737,6 +13790,8 @@ dependencies = [
  "polkadot-runtime-common",
  "polkadot-runtime-parachains",
  "rbtag",
+ "relay-aleph-parachain-client",
+ "relay-aleph-zero-client",
  "relay-bridge-hub-kusama-client",
  "relay-bridge-hub-polkadot-client",
  "relay-bridge-hub-rococo-client",

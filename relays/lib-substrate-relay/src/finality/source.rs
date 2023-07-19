@@ -75,6 +75,9 @@ impl<P: SubstrateFinalitySyncPipeline, SourceClnt: Client<P::SourceChain>>
 	) -> Result<BlockNumberOf<P::SourceChain>, Error> {
 		// we **CAN** continue to relay finality proofs if source node is out of sync, because
 		// target node may be missing proofs that are already available at the source
+
+		log::debug!("Fetching best finalized block number from the source node");
+
 		self.client.best_finalized_header_number().await
 	}
 
@@ -286,7 +289,10 @@ async fn header_and_finality_proof<P: SubstrateFinalitySyncPipeline>(
 	Error,
 > {
 	let header_hash = client.header_hash_by_number(number).await?;
+	log::debug!(target: "bridge", "Fetching block by hash {:?} from {}", header_hash, P::SourceChain::NAME);
+
 	let signed_block = client.block_by_hash(header_hash).await?;
+	log::debug!(target: "bridge", "Fetching justification for block #{} from {}", number, P::SourceChain::NAME);
 
 	let justification = signed_block
 		.justification(P::FinalityEngine::ID)
@@ -295,6 +301,16 @@ async fn header_and_finality_proof<P: SubstrateFinalitySyncPipeline>(
 		})
 		.transpose()
 		.map_err(Error::ResponseParseFailed)?;
+
+	log::debug!(target: "bridge", "Fetched justification for block #{} from {}", number, P::SourceChain::NAME);
+	
+	let justification = match justification {
+		Some(mut justification) => {
+			justification.set_block_number(number);
+			Some(justification)
+		},
+		None => None,
+	};
 
 	Ok((signed_block.header().into(), justification))
 }

@@ -49,14 +49,76 @@ pub enum AlephJustification {
 	EmergencySignature(AuthoritySignature),
 }
 
-#[derive(RuntimeDebug, Clone, Encode, Decode, PartialEq, Eq)]
-pub struct AlephFullJustification<Header: HeaderT> {
-	header: Header,
+#[derive(Clone, Encode, Debug, PartialEq, Eq)]
+pub struct VersionedAlephJustification {
+	version: Version,
+	num_bytes: u16,
 	justification: AlephJustification,
 }
 
-#[derive(Eq, Decode, PartialEq, Debug, Copy, Clone)]
+
+#[derive(Eq, Encode, Decode, PartialEq, Debug, Copy, Clone)]
 pub struct Version(pub u16);
+
+impl Decode for VersionedAlephJustification {
+	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
+		let version = Version::decode(input)?;
+		let num_bytes = u16::decode(input)?;
+		let justification = match version {
+			Version(3) => AlephJustification::decode(input)?,
+			_ => return Err(codec::Error::from("Unsupported justification version")),
+		};
+		Ok(VersionedAlephJustification { version, num_bytes, justification })
+	}
+}
+
+impl From<AlephJustification> for VersionedAlephJustification {
+	fn from(justification: AlephJustification) -> Self {
+		// num_bytes is not used here, but we still need to encode it.
+		Self { version: Version(3), num_bytes: 0, justification }
+	}
+}
+
+impl From<VersionedAlephJustification> for AlephJustification {
+	fn from(justification: VersionedAlephJustification) -> Self {
+		justification.justification
+	}
+}
+
+#[derive(RuntimeDebug, Clone, Encode, PartialEq, Eq)]
+pub struct AlephFullJustification<Header: HeaderT> {
+	header_number: Header::Number,
+	justification: AlephJustification,
+}
+
+impl<Header: HeaderT> Decode for AlephFullJustification<Header> {
+	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
+		let versioned_justification = VersionedAlephJustification::decode(input)?;
+		Ok(AlephFullJustification { header_number: 0u32.into(), justification: versioned_justification.justification })
+	}
+}
+
+impl<Header: HeaderT> AlephFullJustification<Header> {
+	pub fn justification(&self) -> &AlephJustification {
+		&self.justification
+	}
+}
+
+impl<Header: HeaderT> From<AlephFullJustification<Header>> for AlephJustification {
+	fn from(value: AlephFullJustification<Header>) -> Self {
+		value.justification
+	}
+}
+
+impl<Header: HeaderT> bp_header_chain::FinalityProof<Header::Number> for AlephFullJustification<Header> {
+	fn target_header_number(&self) -> Header::Number {
+		self.header_number
+	}
+
+	fn set_block_number(&mut self, block_number: Header::Number) {
+		self.header_number = block_number;
+	}
+}
 
 // Decodes from an actual on-chain justification format.
 pub fn decode_versioned_aleph_justification<I: Input>(
@@ -68,38 +130,6 @@ pub fn decode_versioned_aleph_justification<I: Input>(
 		Version(3) =>
 			Ok(AlephJustification::decode(input).map_err(|_| Error::JustificationNotDecodable)?),
 		_ => Err(Error::UnsupportedJustificationVersion),
-	}
-}
-
-impl<Header: HeaderT> AlephFullJustification<Header> {
-	pub fn new(header: Header, justification: AlephJustification) -> Self {
-		Self { header, justification }
-	}
-
-	pub fn header(&self) -> &Header {
-		&self.header
-	}
-
-	pub fn justification(&self) -> &AlephJustification {
-		&self.justification
-	}
-
-	pub fn justification_mut(&mut self) -> &mut AlephJustification {
-		&mut self.justification
-	}
-
-	pub fn into_justification(self) -> AlephJustification {
-		self.justification
-	}
-
-	pub fn into_header(self) -> Header {
-		self.header
-	}
-}
-
-impl<H: HeaderT> bp_header_chain::FinalityProof<H::Number> for AlephFullJustification<H> {
-	fn target_header_number(&self) -> H::Number {
-		*self.header().number()
 	}
 }
 
@@ -210,7 +240,8 @@ pub mod test_utils {
 
 	pub fn aleph_justification_from_hex(hex: &str) -> AlephJustification {
 		let encoded_justification: Vec<u8> = FromHex::from_hex(hex).unwrap();
-		decode_versioned_aleph_justification(&mut encoded_justification.as_slice()).unwrap()
+		let versioned_justification = VersionedAlephJustification::decode(&mut encoded_justification.as_slice()).unwrap();
+		versioned_justification.into()
 	}
 }
 
@@ -270,13 +301,13 @@ pub mod tests {
 	#[test]
 	fn devnet_justification_decodes() {
 		let encoded_justification: Vec<u8> = FromHex::from_hex(DEVNET_JUSTIFICATION).unwrap();
-		assert!(decode_versioned_aleph_justification(&mut encoded_justification.as_slice()).is_ok());
+		assert!(VersionedAlephJustification::decode(&mut encoded_justification.as_slice()).is_ok());
 	}
 
 	#[test]
 	fn mainnet_justification_decode() {
 		let encoded_justification: Vec<u8> = FromHex::from_hex(MAINNET_JUSTIFICATION).unwrap();
-		assert!(decode_versioned_aleph_justification(&mut encoded_justification.as_slice()).is_ok());
+		assert!(VersionedAlephJustification::decode(&mut encoded_justification.as_slice()).is_ok());
 	}
 
 	#[test]

@@ -1,40 +1,56 @@
-use crate::cli::bridge::{CliBridgeBase, MessagesCliBridge, RelayToRelayHeadersCliBridge};
-use substrate_relay_helper::finality::{
-	engine::Grandpa as GrandpaFinalityEngine, SubstrateFinalitySyncPipeline,
-};
+use crate::cli::bridge::{CliBridgeBase, RelayToRelayHeadersCliBridge};
+use substrate_relay_helper::finality::{engine::AlephEngine, SubstrateFinalitySyncPipeline};
 
-substrate_relay_helper::generate_submit_finality_proof_call_builder!(
-	MillauFinalityToRialtoParachain,
-	MillauFinalityToRialtoParachainCallBuilder,
-	relay_rialto_parachain_client::RuntimeCall::BridgeMillauGrandpa,
-	relay_rialto_parachain_client::BridgeGrandpaCall::submit_finality_proof
-);
+pub struct AlephZeroFinalityToAlephParachainCallBuilder;
+impl
+	::substrate_relay_helper::finality::SubmitFinalityProofCallBuilder<
+		AlephZeroFinalityToAlephParachain,
+	> for AlephZeroFinalityToAlephParachainCallBuilder
+{
+	fn build_submit_finality_proof_call(
+                    header: relay_substrate_client::SyncHeader<
+                        relay_substrate_client::HeaderOf<
+                            <AlephZeroFinalityToAlephParachain as ::substrate_relay_helper::finality::SubstrateFinalitySyncPipeline>::SourceChain,
+                        >,
+                    >,
+                    proof: bp_aleph_header_chain::aleph_justification::AlephFullJustification<
+                        relay_substrate_client::HeaderOf<
+                            <AlephZeroFinalityToAlephParachain as ::substrate_relay_helper::finality::SubstrateFinalitySyncPipeline>::SourceChain,
+                        >,
+                    >,
+                ) -> relay_substrate_client::CallOf<
+                    <AlephZeroFinalityToAlephParachain as ::substrate_relay_helper::finality::SubstrateFinalitySyncPipeline>::TargetChain,
+	>{
+		log::debug!("AlephZeroFinalityToAlephParachainCallBuilder::build_submit_finality_proof_call for header: {:?} and proof: {:?}", header, proof);
+		relay_aleph_parachain_client::RuntimeCall::BridgeAleph(
+			relay_aleph_parachain_client::BridgeAlephCall::submit_finality_proof {
+				header: header.into_inner(),
+				justification: proof.into(),
+			},
+		)
+	}
+}
 
-/// Description of Millau -> Rialto finalized headers bridge.
+/// Description of AlephZero -> Aleph Parachain finalized headers bridge.
 #[derive(Clone, Debug)]
-pub struct MillauFinalityToRialtoParachain;
+pub struct AlephZeroFinalityToAlephParachain;
 
-impl SubstrateFinalitySyncPipeline for MillauFinalityToRialtoParachain {
-	type SourceChain = relay_millau_client::Millau;
-	type TargetChain = relay_rialto_parachain_client::RialtoParachain;
+impl SubstrateFinalitySyncPipeline for AlephZeroFinalityToAlephParachain {
+	type SourceChain = relay_aleph_zero_client::AlephZero;
+	type TargetChain = relay_aleph_parachain_client::AlephParachain;
 
-	type FinalityEngine = GrandpaFinalityEngine<Self::SourceChain>;
-	type SubmitFinalityProofCallBuilder = MillauFinalityToRialtoParachainCallBuilder;
+	type FinalityEngine = AlephEngine<Self::SourceChain>;
+	type SubmitFinalityProofCallBuilder = AlephZeroFinalityToAlephParachainCallBuilder;
 }
 
-//// `Millau` to `RialtoParachain`  bridge definition.
-pub struct MillauToRialtoParachainCliBridge {}
+//// `AlephZero` to `AlephParachain`  bridge definition.
+pub struct AlephZeroToAlephParachainCliBridge {}
 
-impl CliBridgeBase for MillauToRialtoParachainCliBridge {
-	type Source = relay_millau_client::Millau;
-	type Target = relay_rialto_parachain_client::RialtoParachain;
+impl CliBridgeBase for AlephZeroToAlephParachainCliBridge {
+	type Source = relay_aleph_zero_client::AlephZero;
+	type Target = relay_aleph_parachain_client::AlephParachain;
 }
 
-impl RelayToRelayHeadersCliBridge for MillauToRialtoParachainCliBridge {
-	type Finality = MillauFinalityToRialtoParachain;
-}
-
-impl MessagesCliBridge for MillauToRialtoParachainCliBridge {
-	type MessagesLane =
-		crate::bridges::rialto_parachain_millau::millau_messages_to_rialto_parachain::MillauMessagesToRialtoParachain;
+impl RelayToRelayHeadersCliBridge for AlephZeroToAlephParachainCliBridge {
+	type Finality = AlephZeroFinalityToAlephParachain;
 }
