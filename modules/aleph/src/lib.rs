@@ -89,18 +89,14 @@ pub mod pallet {
 	impl<T: Config> Pallet<T> {
 		/// Verify a target header is finalized according to the given finality proof.
 		///
-		/// It will use the underlying storage pallet to fetch information about the current
-		/// authorities and best finalized header in order to verify that the header is finalized.
+		/// It verifies the finality proof against the current authority set held in storage.
+		/// Rejects headers with number lower than the best known finalized header.
 		///
-		/// If successful in verification, it will write the target header to the underlying storage
-		/// pallet.
+		/// If successful in verification, it updates the best finalized header.
 		///
 		/// The call fails if:
-		///
 		/// - the pallet is halted;
-		///
 		/// - the pallet knows better header than the `finality_target`;
-		///
 		/// - justification is invalid;
 		///
 		/// For now, weights are incorrect.
