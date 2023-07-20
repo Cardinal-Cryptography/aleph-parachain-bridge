@@ -48,7 +48,7 @@ pub trait Engine<C: Chain>: Send {
 	/// A reader that can extract the consensus log from the header digest and interpret it.
 	type ConsensusLogReader: ConsensusLogReader;
 	/// Type of finality proofs, used by consensus engine.
-	type FinalityProof: FinalityProof<BlockNumberOf<C>> + Decode + Encode;
+	type FinalityProof: FinalityProof + Decode + Encode;
 	/// Type of bridge pallet initialization data.
 	type InitializationData: std::fmt::Debug + Send + Sync + 'static;
 	/// Type of bridge pallet operating mode.

@@ -124,18 +124,6 @@ pub struct InitializationData<H: HeaderT> {
 	pub operating_mode: BasicOperatingMode,
 }
 
-/// Abstract finality proof that is justifying block finality.
-pub trait FinalityProof<Number>: Clone + Send + Sync + Debug {
-	/// Return number of header that this proof is generated for.
-	fn target_header_number(&self) -> Number;
-
-	// A dirty hack to make `FinalityProof` usable for Aleph. 
-	/// Set number of header that this proof is generated for.
-	fn set_block_number(&mut self, _block_number: Number) {
-		() // noop by default
-	}
-}
-
 /// A trait that provides helper methods for querying the consensus log.
 pub trait ConsensusLogReader {
 	/// Returns true if digest contains item that schedules authorities set change.

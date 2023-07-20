@@ -29,7 +29,7 @@ impl Chain for AlephZero {
 	const NAME: &'static str = "AlephZero";
 	const BEST_FINALIZED_HEADER_ID_METHOD: &'static str =
 		bp_aleph_zero::BEST_FINALIZED_ALEPH_ZERO_HEADER_METHOD;
-	const AVERAGE_BLOCK_INTERVAL: Duration = Duration::from_secs(5);
+	const AVERAGE_BLOCK_INTERVAL: Duration = Duration::from_secs(1);
 
 	type SignedBlock = bp_polkadot_core::SignedBlock;
 	type Call = RuntimeCall;
@@ -40,74 +40,6 @@ impl ChainWithBalances for AlephZero {
 		bp_polkadot_core::AccountInfoStorageMapKeyProvider::final_key(account_id)
 	}
 }
-
-/*impl ChainWithTransactions for AlephZero {
-	type AccountKeyPair = sp_core::sr25519::Pair;
-    type SignedTransaction = UncheckedExtrinsic<RuntimeCall, SignedExtension>;
-
-    fn sign_transaction(
-        param: relay_substrate_client::SignParam<Self>,
-        unsigned: relay_substrate_client::UnsignedTransaction<Self>,
-    ) -> Result<Self::SignedTransaction, relay_substrate_client::Error>
-    where
-        Self: Sized,
-    {
-        println!("{:?}", hex::encode(unsigned.call.encode()));
-
-        let extra = SignedExtension::new(
-            (
-                (),                       // non-zero sender
-                (),                       // spec version
-                (),                       // tx version
-                (),                       // genesis
-                unsigned.era.frame_era(), // era
-                unsigned.nonce.into(),    // nonce (compact encoding)
-                (),                       // Check weight
-                unsigned.tip.into(),      // transaction payment / tip (compact encoding)
-            ),
-            Some((
-                (),
-                param.spec_version,
-                param.transaction_version,
-                param.genesis_hash,
-                unsigned.era.signed_payload(param.genesis_hash),
-                (),
-                (),
-                (),
-            )),
-        );
-
-        let raw_payload = SignedPayload::new(unsigned.call, extra);
-        let raw_payload = raw_payload?;
-
-        let signature = raw_payload.using_encoded(|payload| param.signer.sign(payload));
-        let (call, extra, _) = raw_payload.deconstruct();
-
-        Ok(UncheckedExtrinsic::new_signed(
-            call,
-            MultiAddress::Id(param.signer.public().into()),
-            signature.into(),
-            extra,
-        ))
-    }
-
-
-	fn is_signed(tx: &Self::SignedTransaction) -> bool {
-		tx.signature.is_some()
-	}
-
-	fn is_signed_by(signer: &Self::AccountKeyPair, tx: &Self::SignedTransaction) -> bool {
-		tx.signature
-			.as_ref()
-			.map(|(address, _, _)| *address == Address::Id(signer.public().into()))
-			.unwrap_or(false)
-	}
-
-	fn parse_transaction(tx: Self::SignedTransaction) -> Option<UnsignedTransaction<Self>> {
-		let extra = &tx.signature.as_ref()?.2;
-		Some(UnsignedTransaction::new(tx.function, extra.nonce()).tip(extra.tip()))
-	}
-}*/
 
 pub type SigningParams = sp_core::sr25519::Pair;
 pub type SyncHeader = relay_substrate_client::SyncHeader<bp_aleph_zero::Header>;
