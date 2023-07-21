@@ -171,13 +171,6 @@ pub mod api {
 				#[derive(:: codec :: Decode, :: codec :: Encode, Clone, Debug, PartialEq)]
 				pub struct Signature(pub runtime_types::sp_core::ed25519::Signature);
 			}
-			#[derive(:: codec :: Decode, :: codec :: Encode, Clone, Debug, PartialEq)]
-			pub struct InitializationData<_0> {
-				pub header: ::std::boxed::Box<_0>,
-				pub authority_list:
-					::std::vec::Vec<runtime_types::bp_aleph_header_chain::app::Public>,
-				pub operating_mode: runtime_types::bp_runtime::BasicOperatingMode,
-			}
 		}
 		pub mod bp_header_chain {
 			use super::runtime_types;
@@ -961,7 +954,7 @@ pub mod api {
 				use super::runtime_types;
 				#[derive(:: codec :: Decode, :: codec :: Encode, Clone, Debug, PartialEq)]
 				pub enum Call {
-					# [codec (index = 0)] submit_finality_proof { header : :: sp_runtime :: generic :: Header < :: core :: primitive :: u32 , :: sp_runtime :: traits :: BlakeTwo256 > , justification : bp_aleph_header_chain :: aleph_justification :: AlephJustification , } , # [codec (index = 1)] initialize { init_data : runtime_types :: bp_aleph_header_chain :: InitializationData < :: sp_runtime :: generic :: Header < :: core :: primitive :: u32 , :: sp_runtime :: traits :: BlakeTwo256 > > , } , # [codec (index = 2)] set_operating_mode { operating_mode : runtime_types :: bp_runtime :: BasicOperatingMode , } , }
+					# [codec (index = 0)] submit_finality_proof { header : :: sp_runtime :: generic :: Header < :: core :: primitive :: u32 , :: sp_runtime :: traits :: BlakeTwo256 > , justification : bp_aleph_header_chain :: aleph_justification :: AlephJustification , } , # [codec (index = 1)] initialize { init_data : bp_aleph_header_chain :: InitializationData < :: sp_runtime :: generic :: Header < :: core :: primitive :: u32 , :: sp_runtime :: traits :: BlakeTwo256 > > , } , # [codec (index = 2)] set_operating_mode { operating_mode : runtime_types :: bp_runtime :: BasicOperatingMode , } , }
 				#[derive(:: codec :: Decode, :: codec :: Encode, Clone, Debug, PartialEq)]
 				pub enum Error {
 					#[codec(index = 0)]

@@ -304,13 +304,6 @@ async fn header_and_finality_proof<P: SubstrateFinalitySyncPipeline>(
 
 	log::debug!(target: "bridge", "Fetched justification for block #{} from {}", number, P::SourceChain::NAME);
 	
-	let justification = match justification {
-		Some(mut justification) => {
-			justification.set_block_number(number);
-			Some(justification)
-		},
-		None => None,
-	};
-
+	let justification = justification.map(|mut j| {j.set_block_number(number); j});
 	Ok((signed_block.header().into(), justification))
 }

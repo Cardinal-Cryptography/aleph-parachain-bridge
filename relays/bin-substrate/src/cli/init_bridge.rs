@@ -16,9 +16,11 @@
 
 use async_trait::async_trait;
 use codec::Encode;
+use relay_aleph_parachain_client::runtime_types::aleph_parachain_runtime;
 
 use crate::{
 	bridges::{
+		aleph_parachain_aleph_zero::aleph_zero_headers_to_aleph_parachain::AlephZeroToAlephParachainCliBridge,
 		kusama_polkadot::{
 			kusama_headers_to_bridge_hub_polkadot::KusamaToBridgeHubPolkadotCliBridge,
 			polkadot_headers_to_bridge_hub_kusama::PolkadotToBridgeHubKusamaCliBridge,
@@ -41,7 +43,7 @@ use relay_substrate_client::{AccountKeyPairOf, Chain, UnsignedTransaction};
 use sp_core::Pair;
 use structopt::StructOpt;
 use strum::{EnumString, EnumVariantNames, VariantNames};
-use substrate_relay_helper::finality::engine::{Engine, Grandpa as GrandpaFinalityEngine};
+use substrate_relay_helper::finality::engine::{Engine, AlephEngine, Grandpa as GrandpaFinalityEngine};
 
 /// Initialize bridge pallet.
 #[derive(StructOpt)]
@@ -64,6 +66,7 @@ pub struct InitBridge {
 #[strum(serialize_all = "kebab_case")]
 /// Bridge to initialize.
 pub enum InitBridgeName {
+	AlephZeroToAlephParachain,
 	MillauToRialto,
 	RialtoToMillau,
 	WestendToMillau,
@@ -111,6 +114,23 @@ where
 		.await;
 
 		Ok(())
+	}
+}
+
+impl BridgeInitializer for AlephZeroToAlephParachainCliBridge {
+	type Engine = AlephEngine<Self::Source>;
+
+	fn encode_init_bridge(
+		init_data: <Self::Engine as Engine<Self::Source>>::InitializationData,
+	) -> <Self::Target as Chain>::Call {
+		type RuntimeCall = relay_aleph_parachain_client::RuntimeCall;
+		type BridgeAlephCall = relay_aleph_parachain_client::BridgeAlephCall;
+		type SudoCall = relay_aleph_parachain_client::SudoCall;
+
+		let initialize_call =
+			RuntimeCall::BridgeAleph(BridgeAlephCall::initialize { init_data });
+
+		RuntimeCall::Sudo(SudoCall::sudo { call: Box::new(initialize_call) })
 	}
 }
 
@@ -236,6 +256,8 @@ impl InitBridge {
 	/// Run the command.
 	pub async fn run(self) -> anyhow::Result<()> {
 		match self.bridge {
+			InitBridgeName::AlephZeroToAlephParachain =>
+				AlephZeroToAlephParachainCliBridge::init_bridge(self),
 			InitBridgeName::MillauToRialto => MillauToRialtoCliBridge::init_bridge(self),
 			InitBridgeName::RialtoToMillau => RialtoToMillauCliBridge::init_bridge(self),
 			InitBridgeName::WestendToMillau => WestendToMillauCliBridge::init_bridge(self),

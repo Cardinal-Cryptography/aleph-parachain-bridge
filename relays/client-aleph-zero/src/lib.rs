@@ -1,14 +1,9 @@
 pub mod runtime_codegen;
 
-use codec::Encode;
-use relay_substrate_client::{
-	Chain, ChainWithBalances, ChainWithTransactions, Error as SubstrateError,
-	SignParam, UnderlyingChainProvider, UnsignedTransaction,
-};
-use sp_core::{storage::StorageKey, Pair};
-use sp_runtime::{generic::SignedPayload, traits::IdentifyAccount, MultiAddress};
+use relay_substrate_client::{Chain, ChainWithBalances, UnderlyingChainProvider};
+use sp_core::storage::StorageKey;
+use sp_runtime::MultiAddress;
 use std::time::Duration;
-use sp_runtime::generic::UncheckedExtrinsic;
 
 pub use runtime_codegen::api::runtime_types;
 

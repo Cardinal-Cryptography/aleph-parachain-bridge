@@ -23,7 +23,7 @@ use bp_header_chain::{
 	ConsensusLogReader, FinalityProof, GrandpaConsensusLogReader,
 };
 use bp_aleph_header_chain::{
-	aleph_justification::AlephFullJustification,
+	aleph_justification::AlephJustificationWithTarget,
 	AlephConsensusLogReader, InitializationData as AlephInitializationData,
 };
 use bp_runtime::{BasicOperatingMode, HeaderIdProvider, OperatingMode};
@@ -48,7 +48,7 @@ pub trait Engine<C: Chain>: Send {
 	/// A reader that can extract the consensus log from the header digest and interpret it.
 	type ConsensusLogReader: ConsensusLogReader;
 	/// Type of finality proofs, used by consensus engine.
-	type FinalityProof: FinalityProof + Decode + Encode;
+	type FinalityProof: FinalityProof<BlockNumberOf<C>> + Decode + Encode;
 	/// Type of bridge pallet initialization data.
 	type InitializationData: std::fmt::Debug + Send + Sync + 'static;
 	/// Type of bridge pallet operating mode.
@@ -116,7 +116,7 @@ pub struct AlephEngine<C>(PhantomData<C>);
 impl<C: ChainWithAleph> Engine<C> for AlephEngine<C> {
 	const ID: ConsensusEngineId = bp_aleph_header_chain::ALEPH_ENGINE_ID;
 	type ConsensusLogReader = AlephConsensusLogReader;
-	type FinalityProof = AlephFullJustification<<C as ChainBase>::Header>;
+	type FinalityProof = AlephJustificationWithTarget<<C as ChainBase>::Header>;
 	type InitializationData = AlephInitializationData<<C as ChainBase>::Header>;
 	type OperatingMode = BasicOperatingMode;
 
@@ -129,7 +129,7 @@ impl<C: ChainWithAleph> Engine<C> for AlephEngine<C> {
 	}
 
 	async fn finality_proofs(
-		client: &impl Client<C>,
+		_client: &impl Client<C>,
 	) -> Result<Subscription<Bytes>, SubstrateError> {
 		// It's only used alongside with a proper way to fetch justifications (query per block), 
 		// so this can just provide an empty stream.
@@ -148,9 +148,27 @@ impl<C: ChainWithAleph> Engine<C> for AlephEngine<C> {
 	}
 
 	async fn prepare_initialization_data(
-		_client: impl Client<C>,
+		client: impl Client<C>,
 	) -> Result<Self::InitializationData, Error<HashOf<C>, BlockNumberOf<C>>> {
-		panic!("This should be done by sudo.")
+		let best_header = client.best_finalized_header()
+			.await
+			.map_err(|err| Error::RetrieveBestHeader(C::NAME, err))?;
+
+		let authority_set = match bp_aleph_header_chain::get_authority_change(best_header.digest()) {
+			Some(authority_set) => authority_set,
+			None => {
+				client
+					.state_call(best_header.hash(), "AlephSessionApi_authorities".to_string(), ())
+					.await
+					.map_err(|err| Error::RetrieveAuthorities(C::NAME, best_header.hash(), err))?
+			}	
+		};
+
+		Ok(AlephInitializationData {
+			header: Box::new(best_header),
+			authority_set,
+			operating_mode: BasicOperatingMode::Normal
+		})
 	}
 }
 

@@ -17,6 +17,7 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use aleph_justification::AlephJustification;
 use bp_runtime::{BasicOperatingMode, Chain, HeaderOf};
 use codec::{Decode, Encode};
 use core::{clone::Clone, cmp::Eq, default::Default, fmt::Debug};
@@ -58,8 +59,8 @@ pub enum ConsensusLog {
 pub struct InitializationData<H: HeaderT> {
 	/// The header from which we should start syncing.
 	pub header: Box<H>,
-	/// The initial authorities of the pallet.
-	pub authority_list: AuthoritySet,
+	/// The initial authorities stored in the pallet.
+	pub authority_set: AuthoritySet,
 	/// Pallet operating mode.
 	pub operating_mode: BasicOperatingMode,
 }
@@ -68,6 +69,11 @@ pub struct InitializationData<H: HeaderT> {
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, TypeInfo)]
 #[allow(non_camel_case_types)]
 pub enum BridgeAlephCall<Header: HeaderT> {
+	#[codec(index = 0)]
+	submit_finality_proof {
+		header: Header,
+		justifiaction: AlephJustification,
+	},
 	#[codec(index = 1)]
 	initialize { init_data: InitializationData<Header> },
 }

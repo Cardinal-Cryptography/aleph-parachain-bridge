@@ -55,6 +55,9 @@ pub enum Error<Hash: Debug + MaybeDisplay, HeaderNumber: Debug + MaybeDisplay> {
 	/// Failed to retrieve header by the hash from the source chain.
 	#[error("Failed to retrieve {0} header with hash {1}: {2:?}")]
 	RetrieveHeader(&'static str, Hash, client::Error),
+	/// Failed to retrieve best finalized header from the source chain.
+	#[error("Failed to retrieve {0} header with hash: {1:?}")]
+	RetrieveBestHeader(&'static str, client::Error),
 	/// Failed to submit signed extrinsic from to the target chain.
 	#[error(
 		"Failed to retrieve `is_initialized` flag of the with-{0} finality pallet at {1}: {2:?}"

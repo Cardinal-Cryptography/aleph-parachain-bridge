@@ -72,64 +72,56 @@ impl Decode for VersionedAlephJustification {
 	}
 }
 
-impl From<AlephJustification> for VersionedAlephJustification {
-	fn from(justification: AlephJustification) -> Self {
-		// num_bytes is not used here, but we still need to encode it.
-		Self { version: Version(3), num_bytes: 0, justification }
-	}
-}
-
 impl From<VersionedAlephJustification> for AlephJustification {
 	fn from(justification: VersionedAlephJustification) -> Self {
 		justification.justification
 	}
 }
 
-#[derive(RuntimeDebug, Clone, Encode, PartialEq, Eq)]
-pub struct AlephFullJustification<Header: HeaderT> {
-	header_number: Header::Number,
+// A wrapper around `AlephJustification` that also contains the block number of the header, 
+// so it is compatible with `bp_header_chain::FinalityProof`.
+#[derive(RuntimeDebug, Clone, PartialEq, Eq)]
+pub struct AlephJustificationWithTarget<Header: HeaderT> {
+	header_number: Option<Header::Number>,
 	justification: AlephJustification,
 }
 
-impl<Header: HeaderT> Decode for AlephFullJustification<Header> {
+// Non-standard implentation because of the way `Engine` uses FinalityProof.
+impl<Header: HeaderT> Decode for AlephJustificationWithTarget<Header> {
 	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
 		let versioned_justification = VersionedAlephJustification::decode(input)?;
-		Ok(AlephFullJustification { header_number: 0u32.into(), justification: versioned_justification.justification })
+		Ok(AlephJustificationWithTarget { header_number: None, justification: versioned_justification.justification })
 	}
 }
 
-impl<Header: HeaderT> AlephFullJustification<Header> {
+// Making sure we never encode this type.
+// This is a workaround for the fact that `Engine` requires `FinalityProof` to be `Encode`.
+// It should be enough to have a functioning `Encode` for `AlephJustification`.
+impl<Header: HeaderT> Encode for AlephJustificationWithTarget<Header> {
+	fn encode(&self) -> Vec<u8> {
+		panic!("AlephJustificationWithTarget should not be encoded")
+	}
+}
+
+impl<Header: HeaderT> AlephJustificationWithTarget<Header> {
 	pub fn justification(&self) -> &AlephJustification {
 		&self.justification
 	}
 }
 
-impl<Header: HeaderT> From<AlephFullJustification<Header>> for AlephJustification {
-	fn from(value: AlephFullJustification<Header>) -> Self {
+impl<Header: HeaderT> From<AlephJustificationWithTarget<Header>> for AlephJustification {
+	fn from(value: AlephJustificationWithTarget<Header>) -> Self {
 		value.justification
 	}
 }
 
-impl<Header: HeaderT> bp_header_chain::FinalityProof<Header::Number> for AlephFullJustification<Header> {
+impl<Header: HeaderT> bp_header_chain::FinalityProof<Header::Number> for AlephJustificationWithTarget<Header> {
 	fn target_header_number(&self) -> Header::Number {
-		self.header_number
+		self.header_number.expect("Header number must be set after decoding the justification.")
 	}
 
 	fn set_block_number(&mut self, block_number: Header::Number) {
-		self.header_number = block_number;
-	}
-}
-
-// Decodes from an actual on-chain justification format.
-pub fn decode_versioned_aleph_justification<I: Input>(
-	input: &mut I,
-) -> Result<AlephJustification, Error> {
-	let version = Version::decode(input).map_err(|_| Error::JustificationNotDecodable)?;
-	let _num_bytes = u16::decode(input).map_err(|_| Error::JustificationNotDecodable)?;
-	match version {
-		Version(3) =>
-			Ok(AlephJustification::decode(input).map_err(|_| Error::JustificationNotDecodable)?),
-		_ => Err(Error::UnsupportedJustificationVersion),
+		self.header_number = Some(block_number);
 	}
 }
 

@@ -3,7 +3,7 @@ pub mod runtime_codegen;
 use bp_bridge_hub_cumulus::BridgeHubSignedExtension;
 use codec::Encode;
 use relay_substrate_client::{
-	Chain, ChainWithBalances, ChainWithMessages, ChainWithTransactions, Error as SubstrateError,
+	Chain, ChainWithBalances, ChainWithTransactions, Error as SubstrateError,
 	SignParam, UnderlyingChainProvider, UnsignedTransaction,
 };
 use sp_core::{storage::StorageKey, Pair};

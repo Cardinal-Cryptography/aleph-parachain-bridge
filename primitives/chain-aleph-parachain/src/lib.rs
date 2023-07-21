@@ -14,7 +14,6 @@ use sp_runtime::{
 	traits::{BlakeTwo256, IdentifyAccount, Verify},
 	MultiSignature, MultiSigner, Perbill,
 };
-use sp_std::vec::Vec;
 
 pub const ALEPH_PARACHAIN_ID: u32 = 2106;
 pub const EXTRA_STORAGE_PROOF_SIZE: u32 = 1024;

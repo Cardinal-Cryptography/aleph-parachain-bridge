@@ -612,7 +612,6 @@ pub(crate) async fn read_missing_headers<
 			},
 			(true, None) => return Err(Error::MissingMandatoryFinalityProof(header.number())),
 			(false, Some(finality_proof)) => {
-				log::debug!("Header {:?} has persistent finality proof", header_number);
 				unjustified_headers.clear();
 				selected_finality_proof = Some((header, finality_proof));
 			},
