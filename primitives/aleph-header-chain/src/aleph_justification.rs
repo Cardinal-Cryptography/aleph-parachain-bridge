@@ -78,42 +78,6 @@ impl From<VersionedAlephJustification> for AlephJustification {
 	}
 }
 
-#[derive(RuntimeDebug, Clone, Encode, PartialEq, Eq)]
-pub struct AlephFullJustification<Header: HeaderT> {
-	header_number: Header::Number,
-	justification: AlephJustification,
-}
-
-impl<Header: HeaderT> Decode for AlephFullJustification<Header> {
-	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
-		let versioned_justification = VersionedAlephJustification::decode(input)?;
-		Ok(AlephFullJustification {
-			header_number: 0u32.into(),
-			justification: versioned_justification.justification,
-		})
-	}
-}
-
-impl<Header: HeaderT> AlephFullJustification<Header> {
-	pub fn justification(&self) -> &AlephJustification {
-		&self.justification
-	}
-}
-
-impl<Header: HeaderT> From<AlephFullJustification<Header>> for AlephJustification {
-	fn from(value: AlephFullJustification<Header>) -> Self {
-		value.justification
-	}
-}
-
-impl<Header: HeaderT> bp_header_chain::FinalityProof<Header::Number>
-	for AlephFullJustification<Header>
-{
-	fn target_header_number(&self) -> Header::Number {
-		self.header_number
-	}
-}
-
 #[derive(Eq, RuntimeDebug, PartialEq, Encode, Decode, TypeInfo, PalletError)]
 pub enum Error {
 	JustificationNotDecodable,
