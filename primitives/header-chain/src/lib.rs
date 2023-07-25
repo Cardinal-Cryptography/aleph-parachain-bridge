@@ -128,6 +128,11 @@ pub struct InitializationData<H: HeaderT> {
 pub trait FinalityProof<Number>: Clone + Send + Sync + Debug {
 	/// Return number of header that this proof is generated for.
 	fn target_header_number(&self) -> Number;
+	// A hack to make `FinalityProof` usable for Aleph. 
+	/// Set number of header that this proof is generated for.
+	fn set_block_number(&mut self, _block_number: Number) {
+		() // noop by default
+	}
 }
 
 /// A trait that provides helper methods for querying the consensus log.

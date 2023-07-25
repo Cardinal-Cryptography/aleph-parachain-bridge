@@ -17,12 +17,14 @@
 
 #![cfg_attr(not(feature = "std"), no_std)]
 
+use crate::aleph_justification::AlephJustification;
+use bp_header_chain::ConsensusLogReader;
 use bp_runtime::{BasicOperatingMode, Chain, HeaderOf};
 use codec::{Decode, Encode};
 use core::{clone::Clone, cmp::Eq, default::Default, fmt::Debug};
 use scale_info::TypeInfo;
 use serde::{Deserialize, Serialize};
-use sp_runtime::{traits::Header as HeaderT, ConsensusEngineId, KeyTypeId, RuntimeDebug};
+use sp_runtime::{traits::Header as HeaderT, ConsensusEngineId, Digest, KeyTypeId, RuntimeDebug};
 use sp_std::{boxed::Box, vec::Vec};
 
 pub mod aleph_justification;
@@ -61,7 +63,7 @@ pub enum ConsensusLog {
 pub struct InitializationData<H: HeaderT> {
 	/// The header from which we should start syncing.
 	pub header: Box<H>,
-	/// The initial authorities of the pallet.
+	/// The initial authorities stored in the pallet.
 	pub authority_list: AuthoritySet,
 	/// Pallet operating mode.
 	pub operating_mode: BasicOperatingMode,
@@ -71,6 +73,8 @@ pub struct InitializationData<H: HeaderT> {
 #[derive(Encode, Decode, Debug, PartialEq, Eq, Clone, TypeInfo)]
 #[allow(non_camel_case_types)]
 pub enum BridgeAlephCall<Header: HeaderT> {
+	#[codec(index = 0)]
+	submit_finality_proof { header: Header, justifiaction: AlephJustification },
 	#[codec(index = 1)]
 	initialize { init_data: InitializationData<Header> },
 }
@@ -80,4 +84,24 @@ pub type BridgeAlephCallOf<C> = BridgeAlephCall<HeaderOf<C>>;
 pub trait ChainWithAleph: Chain {
 	const WITH_CHAIN_ALEPH_PALLET_NAME: &'static str;
 	const MAX_AUTHORITIES_COUNT: u32;
+}
+
+/// A struct that provides helper methods for querying Aleph consensus log.
+pub struct AlephConsensusLogReader;
+
+impl ConsensusLogReader for AlephConsensusLogReader {
+	fn schedules_authorities_change(digest: &Digest) -> bool {
+		get_authority_change(digest).is_some()
+	}
+}
+
+// Helper method for reading Aleph's consensus log.
+pub fn get_authority_change(digest: &Digest) -> Option<AuthoritySet> {
+	use sp_runtime::generic::OpaqueDigestItemId;
+	let id = OpaqueDigestItemId::Consensus(&ALEPH_ENGINE_ID);
+	let filter_log = |log: ConsensusLog| match log {
+		ConsensusLog::AlephAuthorityChange(change) => Some(change),
+	};
+
+	digest.convert_first(|l| l.try_to(id).and_then(filter_log))
 }

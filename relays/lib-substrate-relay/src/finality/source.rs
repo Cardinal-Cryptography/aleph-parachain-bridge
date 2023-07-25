@@ -296,5 +296,8 @@ async fn header_and_finality_proof<P: SubstrateFinalitySyncPipeline>(
 		.transpose()
 		.map_err(Error::ResponseParseFailed)?;
 
+	// We need to set block number in justification, because it's not present in the
+	// Aleph justification itself.
+	let justification = justification.map(|mut j| {j.set_block_number(number); j});
 	Ok((signed_block.header().into(), justification))
 }

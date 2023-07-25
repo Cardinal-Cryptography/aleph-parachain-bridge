@@ -10256,6 +10256,7 @@ version = "0.1.0"
 dependencies = [
  "async-std",
  "async-trait",
+ "bp-aleph-header-chain",
  "bp-header-chain",
  "bp-messages",
  "bp-polkadot-core",
@@ -13753,6 +13754,7 @@ dependencies = [
  "anyhow",
  "async-std",
  "async-trait",
+ "bp-aleph-header-chain",
  "bp-header-chain",
  "bp-messages",
  "bp-parachains",

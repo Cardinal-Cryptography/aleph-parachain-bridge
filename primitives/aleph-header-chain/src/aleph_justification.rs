@@ -78,6 +78,60 @@ impl From<VersionedAlephJustification> for AlephJustification {
 	}
 }
 
+// A wrapper around `AlephJustification` that also contains the block number of the header,
+// so it is compatible with `bp_header_chain::FinalityProof`.
+#[derive(RuntimeDebug, Clone, PartialEq, Eq)]
+pub struct AlephJustificationWithTarget<Header: HeaderT> {
+	header_number: Option<Header::Number>,
+	justification: AlephJustification,
+}
+
+// Non-standard implementation because of the way `Engine` uses FinalityProof.
+impl<Header: HeaderT> Decode for AlephJustificationWithTarget<Header> {
+	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
+		let versioned_justification = VersionedAlephJustification::decode(input)?;
+		Ok(AlephJustificationWithTarget {
+			header_number: None,
+			justification: versioned_justification.justification,
+		})
+	}
+}
+
+// Making sure we never encode this type.
+// This is a workaround for the fact that `Engine` requires `FinalityProof` to be `Encode`.
+// It should be enough to have a functioning `Encode` for `AlephJustification` as it is needed
+// for encoding `submit_finality_proof` call.
+impl<Header: HeaderT> Encode for AlephJustificationWithTarget<Header> {
+	fn encode(&self) -> Vec<u8> {
+		panic!("AlephJustificationWithTarget should not be encoded")
+	}
+}
+
+impl<Header: HeaderT> AlephJustificationWithTarget<Header> {
+	pub fn justification(&self) -> &AlephJustification {
+		&self.justification
+	}
+}
+
+impl<Header: HeaderT> From<AlephJustificationWithTarget<Header>> for AlephJustification {
+	fn from(value: AlephJustificationWithTarget<Header>) -> Self {
+		value.justification
+	}
+}
+
+impl<Header: HeaderT> bp_header_chain::FinalityProof<Header::Number>
+	for AlephJustificationWithTarget<Header>
+{
+	fn target_header_number(&self) -> Header::Number {
+		self.header_number
+			.expect("Header number must be set after decoding the justification.")
+	}
+
+	fn set_block_number(&mut self, block_number: Header::Number) {
+		self.header_number = Some(block_number);
+	}
+}
+
 #[derive(Eq, RuntimeDebug, PartialEq, Encode, Decode, TypeInfo, PalletError)]
 pub enum Error {
 	JustificationNotDecodable,
