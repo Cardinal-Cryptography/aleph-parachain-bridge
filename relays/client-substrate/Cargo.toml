@@ -21,6 +21,7 @@ thiserror = "1.0.40"
 
 # Bridge dependencies
 
+bp-aleph-header-chain = { path = "../../primitives/aleph-header-chain" }
 bp-header-chain = { path = "../../primitives/header-chain" }
 bp-messages = { path = "../../primitives/messages" }
 bp-polkadot-core = { path = "../../primitives/polkadot-core" }

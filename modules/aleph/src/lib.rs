@@ -29,7 +29,7 @@
 
 use bp_aleph_header_chain::{
 	aleph_justification::{verify_justification, AlephJustification},
-	AuthoritySet, ChainWithAleph, ConsensusLog, InitializationData, ALEPH_ENGINE_ID,
+	get_authority_change, ChainWithAleph, InitializationData,
 };
 use bp_header_chain::{HeaderChain, StoredHeaderData, StoredHeaderDataBuilder};
 use bp_runtime::{BlockNumberOf, HashOf, HeaderId, HeaderOf, OwnedBridgeModule};
@@ -359,7 +359,7 @@ pub mod pallet {
 		) -> Result<bool, Error<T>> {
 			let mut change_enacted = false;
 
-			if let Some(change) = super::get_authority_change(header) {
+			if let Some(change) = super::get_authority_change(header.digest()) {
 				let next_authorities = StoredAuthoritySet::<T>::try_new(change)?;
 				<CurrentAuthoritySet<T>>::put(&next_authorities);
 				change_enacted = true;
@@ -404,16 +404,6 @@ impl<T: Config> HeaderChain<BridgedChain<T>> for AlephChainHeaders<T> {
 	}
 }
 
-pub(crate) fn get_authority_change<H: Header>(header: &H) -> Option<AuthoritySet> {
-	use sp_runtime::generic::OpaqueDigestItemId;
-	let id = OpaqueDigestItemId::Consensus(&ALEPH_ENGINE_ID);
-	let filter_log = |log: ConsensusLog| match log {
-		ConsensusLog::AlephAuthorityChange(change) => Some(change),
-	};
-
-	header.digest().convert_first(|l| l.try_to(id).and_then(filter_log))
-}
-
 #[cfg(test)]
 mod tests {
 	use super::*;
@@ -425,7 +415,7 @@ mod tests {
 			aleph_justification_from_hex, decode_from_hex, raw_authorities_into_authority_set,
 			AURA_ENGINE_ID,
 		},
-		AuthorityId,
+		AuthorityId, AuthoritySet, ALEPH_ENGINE_ID,
 	};
 	use bp_runtime::{BasicOperatingMode, UnverifiedStorageProof};
 	use bp_test_utils::{generate_owned_bridge_module_tests, Account, ALICE, BOB, CHARLIE};
@@ -733,7 +723,7 @@ mod tests {
 	#[test]
 	fn finds_authority_change_log() {
 		let (_, header, _) = devnet_header_and_justification_2();
-		assert!(get_authority_change(&header).is_some());
+		assert!(get_authority_change(&header.digest()).is_some());
 	}
 
 	#[test]

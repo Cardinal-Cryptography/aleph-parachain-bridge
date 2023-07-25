@@ -18,6 +18,10 @@
 
 use crate::error::Error;
 use async_trait::async_trait;
+use bp_aleph_header_chain::{
+	aleph_justification::AlephJustificationWithTarget,
+	AlephConsensusLogReader, InitializationData as AlephInitializationData,
+};
 use bp_header_chain::{
 	justification::{verify_and_optimize_justification, GrandpaJustification},
 	ConsensusLogReader, FinalityProof, GrandpaConsensusLogReader,
@@ -28,8 +32,8 @@ use finality_grandpa::voter_set::VoterSet;
 use futures::stream::StreamExt;
 use num_traits::{One, Zero};
 use relay_substrate_client::{
-	BlockNumberOf, Chain, ChainWithGrandpa, Client, Error as SubstrateError, HashOf, HeaderOf,
-	Subscription,
+	BlockNumberOf, Chain, ChainWithAleph, ChainBase, ChainWithGrandpa, Client, Error as SubstrateError, HashOf, HeaderOf,
+	Subscription, StreamDescription
 };
 use sp_consensus_grandpa::{AuthorityList as GrandpaAuthoritiesSet, GRANDPA_ENGINE_ID};
 use sp_core::{storage::StorageKey, Bytes};
@@ -100,6 +104,69 @@ pub trait Engine<C: Chain>: Send {
 	async fn prepare_initialization_data(
 		client: impl Client<C>,
 	) -> Result<Self::InitializationData, Error<HashOf<C>, BlockNumberOf<C>>>;
+}
+
+/// Aleph finality engine.
+pub struct AlephEngine<C>(PhantomData<C>);
+
+#[async_trait]
+impl<C: ChainWithAleph> Engine<C> for AlephEngine<C> {
+	const ID: ConsensusEngineId = bp_aleph_header_chain::ALEPH_ENGINE_ID;
+	type ConsensusLogReader = AlephConsensusLogReader;
+	type FinalityProof = AlephJustificationWithTarget<<C as ChainBase>::Header>;
+	type InitializationData = AlephInitializationData<<C as ChainBase>::Header>;
+	type OperatingMode = BasicOperatingMode;
+
+	fn is_initialized_key() -> StorageKey {
+		bp_header_chain::storage_keys::best_finalized_key(C::WITH_CHAIN_ALEPH_PALLET_NAME)	
+	}
+
+	fn pallet_operating_mode_key() -> StorageKey {
+		bp_header_chain::storage_keys::pallet_operating_mode_key(C::WITH_CHAIN_ALEPH_PALLET_NAME)
+	}
+
+	async fn finality_proofs(
+		_client: &impl Client<C>,
+	) -> Result<Subscription<Bytes>, SubstrateError> {
+		// It's only used alongside with a proper way to fetch justifications (query per block), 
+		// so this can just provide an empty stream.
+		Ok(Subscription::new_forwarded(
+			StreamDescription::new("Empty Aleph justification stream".into(), C::NAME.into()),
+			futures::stream::empty(),
+		))
+	}
+
+	async fn optimize_proof<TargetChain: Chain>(
+		_target_client: &impl Client<TargetChain>,
+		_header: &C::Header,
+		proof: Self::FinalityProof,
+	) -> Result<Self::FinalityProof, SubstrateError> {
+		Ok(proof)
+	}
+
+	async fn prepare_initialization_data(
+		client: impl Client<C>,
+	) -> Result<Self::InitializationData, Error<HashOf<C>, BlockNumberOf<C>>> {
+		let best_header = client.best_finalized_header()
+			.await
+			.map_err(|err| Error::RetrieveBestHeader(C::NAME, err))?;
+
+		let authority_set = match bp_aleph_header_chain::get_authority_change(best_header.digest()) {
+			Some(authority_set) => authority_set,
+			None => {
+				client
+					.state_call(best_header.hash(), "AlephSessionApi_authorities".to_string(), ())
+					.await
+					.map_err(|err| Error::RetrieveAuthorities(C::NAME, best_header.hash(), err))?
+			}	
+		};
+
+		Ok(AlephInitializationData {
+			header: Box::new(best_header),
+			authority_list: authority_set,
+			operating_mode: BasicOperatingMode::Normal
+		})
+	}
 }
 
 /// GRANDPA finality engine.
