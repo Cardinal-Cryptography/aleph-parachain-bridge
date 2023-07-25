@@ -86,7 +86,7 @@ pub struct AlephJustificationWithTarget<Header: HeaderT> {
 	justification: AlephJustification,
 }
 
-// Non-standard implentation because of the way `Engine` uses FinalityProof.
+// Non-standard implementation because of the way `Engine` uses FinalityProof.
 impl<Header: HeaderT> Decode for AlephJustificationWithTarget<Header> {
 	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
 		let versioned_justification = VersionedAlephJustification::decode(input)?;
@@ -99,7 +99,8 @@ impl<Header: HeaderT> Decode for AlephJustificationWithTarget<Header> {
 
 // Making sure we never encode this type.
 // This is a workaround for the fact that `Engine` requires `FinalityProof` to be `Encode`.
-// It should be enough to have a functioning `Encode` for `AlephJustification`.
+// It should be enough to have a functioning `Encode` for `AlephJustification` as it is needed
+// for encoding `submit_finality_proof` call.
 impl<Header: HeaderT> Encode for AlephJustificationWithTarget<Header> {
 	fn encode(&self) -> Vec<u8> {
 		panic!("AlephJustificationWithTarget should not be encoded")
