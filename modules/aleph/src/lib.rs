@@ -327,7 +327,7 @@ pub mod pallet {
 
 		/// Since this writes to storage with no real checks this should only be used in functions
 		/// that were called by a trusted origin.
-		pub(crate) fn initialize_bridge(
+		fn initialize_bridge(
 			init_params: super::InitializationData<BridgedHeader<T>>,
 		) -> Result<(), Error<T>> {
 			let super::InitializationData { header, authority_list, operating_mode } = init_params;
@@ -612,7 +612,8 @@ pub mod pallet {
 		}
 
 		// Some tests with "real-life" data
-		// Best case these were testnet/mainnet blocks, but there are no needed digests there yet
+		// Best case these were testnet/mainnet blocks, but there are no needed digests there yet,
+		// so we use data from local devnet
 		const FIRST_RAW_DEVNET_AUTHORITY_SET: [&str; 4] = [
 			"11bf91f48b4e2d71fb33e4690e427ed12e989a9d9adea06ab18cacd7ea859a29",
 			"09a63b4c82345fac9594b7e0ccfc007983f8be6e75de1fe52e7d1d083b9d8efd",
@@ -713,7 +714,7 @@ pub mod pallet {
 		}
 
 		#[test]
-		fn accepts_testnet_justifications_with_authority_change() {
+		fn accepts_devnet_justifications_with_authority_change() {
 			run_test(|| {
 				let (init_authority_set, init_header, _justification) =
 					devnet_header_and_justification_1();
