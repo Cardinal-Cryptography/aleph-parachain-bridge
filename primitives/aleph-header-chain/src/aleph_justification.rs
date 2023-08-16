@@ -1,7 +1,7 @@
-use codec::{Decode, Encode, Input};
+use codec::{Decode, Encode};
 use frame_support::PalletError;
 use sp_runtime::{traits::Header as HeaderT, RuntimeAppPublic, RuntimeDebug};
-use sp_std::{vec, vec::Vec};
+use sp_std::vec::Vec;
 
 use crate::{AuthoritySet, AuthoritySignature};
 use scale_info::TypeInfo;
@@ -9,37 +9,7 @@ use scale_info::TypeInfo;
 #[derive(TypeInfo, PartialEq, Eq, Clone, Debug, Decode, Encode)]
 pub struct Signature(AuthoritySignature);
 
-// This could be pulled from aleph_bft_cryto, but we need to implement TypeInfo for it.
-// TODO: add TypeInfo to aleph_bft_crypto::NodeMap and reuse it here.
-#[derive(TypeInfo, Clone, Eq, PartialEq, Debug, Default, Decode, Encode)]
-pub struct SignatureSet(Vec<Option<Signature>>);
-
-impl SignatureSet {
-	/// Constructs a new node map with a given length.
-	pub fn with_size(len: usize) -> Self {
-		let v = vec![None; len];
-		SignatureSet(v)
-	}
-
-	pub fn size(&self) -> usize {
-		self.0.len()
-	}
-
-	pub fn iter(&self) -> impl Iterator<Item = (usize, &Signature)> {
-		self.0
-			.iter()
-			.enumerate()
-			.filter_map(|(idx, maybe_value)| Some((idx, maybe_value.as_ref()?)))
-	}
-
-	pub fn get(&self, node_id: usize) -> Option<&Signature> {
-		self.0[node_id].as_ref()
-	}
-
-	pub fn insert(&mut self, node_id: usize, value: Signature) {
-		self.0[node_id] = Some(value)
-	}
-}
+pub type SignatureSet = Vec<Option<Signature>>;
 
 /// A proof of block finality, currently in the form of a sufficiently long list of signatures or a
 /// sudo signature of a block for emergency finalization.
@@ -53,36 +23,17 @@ pub enum AlephJustification {
 pub struct Version(pub u16);
 
 /// Actual on-chain justification format.
-#[derive(Clone, Encode, Debug, PartialEq, Eq)]
+#[derive(Clone, Encode, Decode, Debug, PartialEq, Eq)]
 pub struct VersionedAlephJustification {
 	version: Version,
 	num_bytes: u16,
 	justification: AlephJustification,
 }
 
-impl Decode for VersionedAlephJustification {
-	fn decode<I: Input>(input: &mut I) -> Result<Self, codec::Error> {
-		let version = Version::decode(input)?;
-		let num_bytes = u16::decode(input)?;
-		let justification = match version {
-			Version(3) => AlephJustification::decode(input)?,
-			_ => return Err(codec::Error::from("Unsupported justification version")),
-		};
-		Ok(VersionedAlephJustification { version, num_bytes, justification })
-	}
-}
-
-impl From<VersionedAlephJustification> for AlephJustification {
-	fn from(justification: VersionedAlephJustification) -> Self {
-		justification.justification
-	}
-}
-
 #[derive(Eq, RuntimeDebug, PartialEq, Encode, Decode, TypeInfo, PalletError)]
 pub enum Error {
 	JustificationNotDecodable,
 	NotEnoughCorrectSignatures,
-	InvalidIndex,
 	EmergencyFinalizerUsed,
 }
 
@@ -93,14 +44,16 @@ pub fn verify_justification<Header: HeaderT>(
 ) -> Result<(), Error> {
 	match justification {
 		AlephJustification::CommitteeMultisignature(signature_set) => {
-			let mut signature_count = 0;
-
-			for (index, signature) in signature_set.iter() {
-				let authority = authority_set.get(index).ok_or(Error::InvalidIndex)?;
-				if authority.verify(&header.hash().encode(), &signature.0) {
-					signature_count += 1;
-				}
-			}
+			let signature_count = signature_set
+				.iter()
+				.zip(authority_set.iter())
+				.filter_map(|(maybe_signature, authority)| {
+					Some((maybe_signature.as_ref()?, authority))
+				})
+				.filter(|(signature, authority)| {
+					authority.verify(&header.hash().encode(), &signature.0)
+				})
+				.count();
 
 			if signature_count < 2 * authority_set.len() / 3 + 1 {
 				return Err(Error::NotEnoughCorrectSignatures)
@@ -156,8 +109,7 @@ pub mod test_utils {
 			let signature = aleph_authority.sign(&header.hash().encode());
 			signatures.push(Some(Signature(signature)));
 		}
-
-		SignatureSet(signatures)
+		signatures
 	}
 
 	pub fn generate_justification(header: &Header, seeds: &Seeds) -> AlephJustification {
@@ -184,7 +136,7 @@ pub mod test_utils {
 		let encoded_justification: Vec<u8> = FromHex::from_hex(hex).unwrap();
 		let versioned_justification =
 			VersionedAlephJustification::decode(&mut encoded_justification.as_slice()).unwrap();
-		versioned_justification.into()
+		versioned_justification.justification
 	}
 }
 

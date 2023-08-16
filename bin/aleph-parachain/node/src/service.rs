@@ -26,12 +26,12 @@ use sc_executor::{
 	HeapAllocStrategy, NativeElseWasmExecutor, NativeExecutionDispatch, WasmExecutor,
 	DEFAULT_HEAP_ALLOC_STRATEGY,
 };
-use sc_network::{NetworkBlock, config::FullNetworkConfiguration};
+use sc_network::{config::FullNetworkConfiguration, NetworkBlock};
 use sc_network_sync::SyncingService;
 use sc_service::{Configuration, PartialComponents, TFullBackend, TFullClient, TaskManager};
 use sc_telemetry::{Telemetry, TelemetryHandle, TelemetryWorker, TelemetryWorkerHandle};
-use substrate_prometheus_endpoint::Registry;
 use sp_keystore::KeystorePtr;
+use substrate_prometheus_endpoint::Registry;
 
 // Our native executor instance.
 pub struct ExecutorDispatch;
@@ -48,10 +48,10 @@ impl NativeExecutionDispatch for ExecutorDispatch {
 	}
 }
 pub type ParachainRuntimeExecutor = ExecutorDispatch;
-type ParachainClient = TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ParachainRuntimeExecutor>>;
+type ParachainClient =
+	TFullClient<Block, RuntimeApi, NativeElseWasmExecutor<ParachainRuntimeExecutor>>;
 type ParachainBackend = TFullBackend<Block>;
 type ParachainBlockImport = TParachainBlockImport<Block, Arc<ParachainClient>, ParachainBackend>;
-
 
 /// Starts a `ServiceBuilder` for a full service.
 ///
@@ -182,7 +182,7 @@ async fn start_node_impl(
 	let (network, system_rpc_tx, tx_handler_controller, start_network, sync_service) =
 		build_network(BuildNetworkParams {
 			parachain_config: &parachain_config,
-            net_config,
+			net_config,
 			client: client.clone(),
 			transaction_pool: transaction_pool.clone(),
 			para_id,
