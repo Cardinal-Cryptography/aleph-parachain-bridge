@@ -354,15 +354,12 @@ pub mod pallet {
 
 		/// Check the given header for an authority set change. If a change
 		/// is found it will be enacted immediately.
-		pub(crate) fn try_enact_authority_change(
+		fn try_enact_authority_change(
 			header: &BridgedHeader<T>,
-		) -> Result<bool, Error<T>> {
-			let mut change_enacted = false;
-
+		) -> Result<(), Error<T>> {
 			if let Some(change) = get_authority_change(header.digest()) {
 				let next_authorities = StoredAuthoritySet::<T>::try_new(change)?;
 				<CurrentAuthoritySet<T>>::put(&next_authorities);
-				change_enacted = true;
 
 				log::info!(
 					target: LOG_TARGET,
@@ -371,7 +368,7 @@ pub mod pallet {
 				);
 			};
 
-			Ok(change_enacted)
+			Ok(())
 		}
 	}
 
